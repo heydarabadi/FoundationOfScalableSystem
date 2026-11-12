@@ -1,6 +1,73 @@
+<div dir="ltr" align="left">
+
+# HighPerformanceTransactionProcessor
+
+**A learning project for high-throughput basket commands and reliable order/inventory processing.**
+
+This repository demonstrates an asynchronous transaction path built with **.NET 10, Apache Kafka, Redis, PostgreSQL, React, Kubernetes, and Prometheus**. It focuses on separating fast basket writes from checkout and inventory reservation, while keeping ordering, retries, observability, and capacity limits visible.
+
+> **Performance target, not a benchmark claim:** 100,000 **basket commands per second** is the capacity-planning target. It has not been proven in production. It does not mean 100,000 checkouts or inventory reservations per second. The checked-in Kubernetes lab is for learning and local experiments, not production capacity.
+
+## At a glance
+
+| Area | Implementation |
+|---|---|
+| API and producer | ASP.NET Core REST API publishes basket commands to Kafka |
+| Basket processing | Kafka consumer updates a Redis read projection and emits checkout events |
+| Inventory and orders | Separate worker reserves all order items in a PostgreSQL transaction |
+| Web application | React storefront with a Persian RTL interface |
+| Local development | Docker Compose |
+| Kubernetes | Kind / Docker Desktop lab manifests; a separate performance profile illustrates larger-scale settings |
+| Observability | .NET metrics, Prometheus, Kafka/Redis/PostgreSQL exporters, and k6 load scripts |
+
+### Request flow
+
+1. The API accepts an `item-set` command and publishes it to Kafka with `basketId` as the message key.
+2. The basket worker processes commands in order per basket and updates the Redis projection. Independent baskets can be processed concurrently.
+3. Checkout submits an order event. The inventory worker reserves all requested items atomically in PostgreSQL; if an item is unavailable, that order transaction is rolled back.
+4. The web app reads the basket projection from Redis and requests order status from the API.
+
+This is an **eventually consistent** basket read path: the API acknowledges Kafka acceptance, and the Redis projection updates asynchronously. The implementation uses delivery acknowledgements and database-side processed-event records, but it does not claim end-to-end exactly-once delivery.
+
+## Quick start
+
+Run the local stack from the repository root:
+
+```powershell
+docker compose up --build
+```
+
+Open [http://localhost:8081](http://localhost:8081). The API is also available at `http://localhost:5080`.
+
+For the guided Kubernetes lab, build and deploy with the context you intend to use:
+
+```powershell
+.\infra\kubernetes\lab\deploy.ps1 -ExpectedContext kind-k8s-course -KindClusterName k8s-course
+```
+
+The script targets a local learning cluster and uses sample lab configuration. Do not reuse its credentials, plaintext listeners, or single-replica dependencies in production. Use TLS, managed secrets, persistent storage, high availability, and a separately sized cluster for a real deployment.
+
+## Performance and measurement
+
+The repository includes two k6 workloads: one sends individual basket commands; the other tests the batch-ingest API. A batch request can carry up to 500 commands, so **HTTP requests per second and basket commands per second are different measurements**. Results in the README and performance runbook are short-duration observations from the named local/lab setup; they are not production SLOs or proof of the 100k target.
+
+For a meaningful capacity result, use independent load generators, production-like hardware and dependencies, realistic key skew and message sizes, sustained runs, failure/recovery tests, and measurements of accepted commands, consumer lag, processing rate, and latency percentiles.
+
+## Documentation
+
+- [System design guide — architecture choices and trade-offs](docs/SYSTEM-DESIGN-MASTER-FA.md)
+- [Kubernetes guide — deployment, scaling, metrics, and hands-on labs](docs/KUBERNETES-GUIDE-FA.md)
+- [100k basket-commands/s capacity runbook](docs/PERFORMANCE-100K-FA.md)
+- [Persian implementation guide and API details](#persian-implementation-guide)
+
+The guides are written primarily in Persian and retain English names for technologies, APIs, and Kubernetes concepts.
+
+</div>
+
+<a id="persian-implementation-guide"></a>
 <div dir="rtl" align="right">
 
-# پردازش‌گر پرفورمنس سبد و سفارش
+# پردازش‌گر پرفورمنس سبد و سفارش | فارسی
 
 ![تصویر معماری پردازش تراکنش، Kafka، Kubernetes و پایش](docs/assets/hpt-architecture-cover.png)
 
