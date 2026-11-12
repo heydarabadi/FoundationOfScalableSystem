@@ -1,0 +1,3 @@
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap');
+
+:root{font-family:'Vazirmatn',Tahoma,sans-serif;color:#192521;background:#f7f8f4;font-synthesis:none;text-rendering:optimizeLegibility;font-weight:400}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-width:320px;min-height:100vh}button{font:inherit}::selection{background:#d7f463;color:#183e31}

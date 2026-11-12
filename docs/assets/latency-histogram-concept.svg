@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="560" viewBox="0 0 1120 560" role="img" aria-labelledby="title desc">
+  <title id="title">Conceptual latency histogram</title>
+  <desc id="desc">Illustrative distribution showing a central latency mass and a long tail; not based on measured HPT sample counts.</desc>
+  <rect width="1120" height="560" rx="28" fill="#101827"/>
+  <text x="72" y="70" fill="#f8fafc" font-family="Segoe UI, Arial, sans-serif" font-size="29" font-weight="700">Latency histogram: how to read the tail</text>
+  <text x="72" y="106" fill="#fbbf24" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="700">Conceptual shape only — not measured HPT bucket data</text>
+  <g stroke="#334155" stroke-width="1">
+    <line x1="145" y1="430" x2="1030" y2="430"/><line x1="145" y1="350" x2="1030" y2="350"/>
+    <line x1="145" y1="270" x2="1030" y2="270"/><line x1="145" y1="190" x2="1030" y2="190"/>
+    <line x1="145" y1="130" x2="145" y2="430"/>
+  </g>
+  <g fill="#64748b" font-family="Segoe UI, Arial, sans-serif" font-size="14" text-anchor="end">
+    <text x="128" y="435">0</text><text x="128" y="355">count</text><text x="128" y="275">more</text>
+  </g>
+  <g fill="#22d3ee">
+    <rect x="180" y="388" width="70" height="42" rx="6"/><rect x="265" y="330" width="70" height="100" rx="6"/>
+    <rect x="350" y="238" width="70" height="192" rx="6"/><rect x="435" y="170" width="70" height="260" rx="6"/>
+    <rect x="520" y="210" width="70" height="220" rx="6"/><rect x="605" y="292" width="70" height="138" rx="6"/>
+  </g>
+  <g fill="#f59e0b">
+    <rect x="690" y="350" width="70" height="80" rx="6"/><rect x="775" y="378" width="70" height="52" rx="6"/>
+    <rect x="860" y="398" width="70" height="32" rx="6"/><rect x="945" y="410" width="70" height="20" rx="6"/>
+  </g>
+  <line x1="654" y1="135" x2="654" y2="430" stroke="#a78bfa" stroke-width="3" stroke-dasharray="8 8"/>
+  <line x1="882" y1="135" x2="882" y2="430" stroke="#fb7185" stroke-width="3" stroke-dasharray="8 8"/>
+  <text x="654" y="153" fill="#c4b5fd" font-family="Segoe UI, Arial, sans-serif" font-size="15" text-anchor="middle">p95</text>
+  <text x="882" y="153" fill="#fda4af" font-family="Segoe UI, Arial, sans-serif" font-size="15" text-anchor="middle">p99</text>
+  <g fill="#cbd5e1" font-family="Segoe UI, Arial, sans-serif" font-size="14" text-anchor="middle">
+    <text x="215" y="458">bucket 1</text><text x="385" y="458">bucket 3</text><text x="555" y="458">bucket 5</text>
+    <text x="725" y="458">bucket 7</text><text x="895" y="458">bucket 9</text>
+  </g>
+  <text x="580" y="508" fill="#94a3b8" font-family="Segoe UI, Arial, sans-serif" font-size="16" text-anchor="middle">Latency buckets (example layout; real boundaries and counts must come from telemetry)</text>
+</svg>

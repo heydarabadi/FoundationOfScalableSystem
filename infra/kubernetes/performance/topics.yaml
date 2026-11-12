@@ -1,0 +1,44 @@
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaTopic
+metadata:
+  name: basket-commands
+  namespace: hpt
+  labels:
+    strimzi.io/cluster: hpt-kafka
+spec:
+  topicName: basket.commands
+  partitions: 512
+  replicas: 4
+  config:
+    min.insync.replicas: 3
+    retention.ms: 3600000
+---
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaTopic
+metadata:
+  name: orders-submitted
+  namespace: hpt
+  labels:
+    strimzi.io/cluster: hpt-kafka
+spec:
+  topicName: orders.submitted
+  partitions: 128
+  replicas: 4
+  config:
+    min.insync.replicas: 3
+    retention.ms: 604800000
+---
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaTopic
+metadata:
+  name: inventory-results
+  namespace: hpt
+  labels:
+    strimzi.io/cluster: hpt-kafka
+spec:
+  topicName: orders.inventory-results
+  partitions: 128
+  replicas: 4
+  config:
+    min.insync.replicas: 3
+    retention.ms: 604800000

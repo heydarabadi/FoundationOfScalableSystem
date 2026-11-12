@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Hpt.Api/Hpt.Api.csproj" />
+    <Project Path="src/Hpt.BasketProcessor/Hpt.BasketProcessor.csproj" />
+    <Project Path="src/Hpt.Contracts/Hpt.Contracts.csproj" />
+    <Project Path="src/Hpt.InventoryProcessor/Hpt.InventoryProcessor.csproj" />
+  </Folder>
+</Solution>

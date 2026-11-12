@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="620" viewBox="0 0 1120 620" role="img" aria-labelledby="title desc">
+  <title id="title">Local kind latency percentiles by target basket command rate</title>
+  <desc id="desc">Observed p95 and p99 HTTP latency values for 100, 1000, and 2000 target basket commands per second during short local kind runs.</desc>
+  <rect width="1120" height="620" rx="28" fill="#0b1220"/>
+  <text x="72" y="70" fill="#f8fafc" font-family="Segoe UI, Arial, sans-serif" font-size="29" font-weight="700">Local kind: HTTP latency percentiles</text>
+  <text x="72" y="105" fill="#94a3b8" font-family="Segoe UI, Arial, sans-serif" font-size="17">Short runs · target basket commands/s · local single-node cluster</text>
+  <g stroke="#334155" stroke-width="1">
+    <line x1="140" y1="490" x2="1020" y2="490"/><line x1="140" y1="410" x2="1020" y2="410"/>
+    <line x1="140" y1="330" x2="1020" y2="330"/><line x1="140" y1="250" x2="1020" y2="250"/>
+    <line x1="140" y1="170" x2="1020" y2="170"/><line x1="140" y1="130" x2="140" y2="490"/>
+  </g>
+  <g fill="#94a3b8" font-family="Segoe UI, Arial, sans-serif" font-size="15" text-anchor="end">
+    <text x="122" y="495">0</text><text x="122" y="415">40</text><text x="122" y="335">80</text>
+    <text x="122" y="255">120</text><text x="122" y="175">160</text>
+  </g>
+  <text x="46" y="330" fill="#cbd5e1" font-family="Segoe UI, Arial, sans-serif" font-size="15" transform="rotate(-90 46 330)" text-anchor="middle">Latency (ms)</text>
+  <g>
+    <rect x="248" y="461.06" width="54" height="28.94" rx="7" fill="#22d3ee"/><rect x="310" y="442.48" width="54" height="47.52" rx="7" fill="#f59e0b"/>
+    <rect x="518" y="442.04" width="54" height="47.96" rx="7" fill="#22d3ee"/><rect x="580" y="367.08" width="54" height="122.92" rx="7" fill="#f59e0b"/>
+    <rect x="788" y="351.02" width="54" height="138.98" rx="7" fill="#22d3ee"/><rect x="850" y="195.66" width="54" height="294.34" rx="7" fill="#f59e0b"/>
+  </g>
+  <g fill="#e2e8f0" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="middle">
+    <text x="275" y="450">14.47</text><text x="337" y="432">23.76</text>
+    <text x="545" y="431">23.98</text><text x="607" y="356">61.46</text>
+    <text x="815" y="340">69.49</text><text x="877" y="178">147.17</text>
+  </g>
+  <g fill="#cbd5e1" font-family="Segoe UI, Arial, sans-serif" font-size="16" text-anchor="middle">
+    <text x="306" y="525">100</text><text x="576" y="525">1,000</text><text x="846" y="525">2,000</text>
+  </g>
+  <text x="580" y="557" fill="#94a3b8" font-family="Segoe UI, Arial, sans-serif" font-size="15" text-anchor="middle">Target basket commands per second</text>
+  <rect x="385" y="585" width="18" height="18" rx="4" fill="#22d3ee"/><text x="412" y="600" fill="#cbd5e1" font-family="Segoe UI, Arial, sans-serif" font-size="15">p95</text>
+  <rect x="500" y="585" width="18" height="18" rx="4" fill="#f59e0b"/><text x="527" y="600" fill="#cbd5e1" font-family="Segoe UI, Arial, sans-serif" font-size="15">p99</text>
+</svg>

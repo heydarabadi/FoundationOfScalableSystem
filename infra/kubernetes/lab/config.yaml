@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hpt-app-config
+  namespace: hpt
+data:
+  Kafka__BootstrapServers: hpt-kafka-kafka-bootstrap:9092
+  Kafka__BasketTopic: basket.commands
+  Kafka__OrdersTopic: orders.submitted
+  Kafka__InventoryResultsTopic: orders.inventory-results
+  Kafka__BasketConsumerGroup: basket-projector-v1
+  Kafka__InventoryConsumerGroup: inventory-reservation-v1
+  Redis__ConnectionString: hpt-redis:6379
+  Basket__TtlSeconds: "86400"
+  Basket__MaxPollBatchSize: "128"
+  Ingestion__MaxConcurrentBatchesPerPod: "8"
+  Web__Origin: http://localhost:8081

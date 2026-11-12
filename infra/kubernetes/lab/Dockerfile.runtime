@@ -1,0 +1,7 @@
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
+WORKDIR /app
+ARG APP_DLL
+COPY . .
+ENV ASPNETCORE_HTTP_PORTS=8080
+ENV APP_DLL=${APP_DLL}
+ENTRYPOINT ["sh", "-c", "exec dotnet \"$APP_DLL\""]
