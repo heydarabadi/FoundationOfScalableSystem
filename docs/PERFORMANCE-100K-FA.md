@@ -1,5 +1,7 @@
 <div dir="rtl" align="right">
 
+<p dir="ltr" align="center"><a href="PERFORMANCE-100K-EN.md">English</a> | <strong>فارسی</strong></p>
+
 # Runbook آزمون پرفورمنس ۱۰۰٬۰۰۰ فرمان سبد در ثانیه
 
 ![نمای تصویری جریان بار، partitionها و داشبورد پایش](assets/hpt-architecture-cover.png)

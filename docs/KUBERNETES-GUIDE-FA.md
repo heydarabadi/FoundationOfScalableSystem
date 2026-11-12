@@ -1,5 +1,7 @@
 <div dir="rtl" align="right">
 
+<p dir="ltr" align="center"><a href="KUBERNETES-GUIDE-EN.md">English</a> | <strong>فارسی</strong></p>
+
 # راهنمای کامل Kubernetes برای HPT
 
 ![نمای معماری HPT روی Kubernetes](assets/hpt-architecture-cover.png)

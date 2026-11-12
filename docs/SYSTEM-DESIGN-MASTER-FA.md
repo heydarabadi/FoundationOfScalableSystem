@@ -1,5 +1,7 @@
 <div dir="rtl" align="right">
 
+<p dir="ltr" align="center"><a href="SYSTEM-DESIGN-MASTER-EN.md">English</a> | <strong>فارسی</strong></p>
+
 # راهنمای جامع طراحی سیستم تراکنش پرترافیک
 
 ![نمای تصویری مسیر تراکنش‌ها، workerها و پایش در Kubernetes](assets/hpt-architecture-cover.png)
