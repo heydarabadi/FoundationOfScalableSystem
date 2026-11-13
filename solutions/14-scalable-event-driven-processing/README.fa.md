@@ -39,13 +39,21 @@
 
 **بخش متناظر در نسخهٔ PDF: صفحه‌های چاپی 271–284.** جمع‌بندی آموزشی با بیان تازه از ایده‌های فصل؛ برای شرح کامل به کتاب مراجعه کن.
 
-معماری event-driven producer و consumer را با رویداد جدا می‌کند. Kafka یک log پایدار و partitionشده می‌دهد: topic رکورد را دسته‌بندی می‌کند، producer آن را منتشر می‌کند و consumer group پردازش را با offset هماهنگ می‌کند. partition key روی ترتیب و parallelism اثر دارد؛ در هر گروه هر partition در هر لحظه حداکثر به یک consumer می‌رسد، پس consumer اضافه ممکن است بیکار باشد. replication و acknowledgement روی دوام و availability اثر دارند؛ retention و replay بازیابی را پشتیبانی می‌کنند. scale باید partition، lag، ظرفیت downstream و ایمنی اثر در برابر تکرار را بسنجد. Kafka رویداد را ذخیره و منتقل می‌کند؛ منطق کسب‌وکار در کد برنامه است.
+معماری event-driven با انتشار واقعیت‌های تغییرناپذیرِ رخ‌داده، منبع رویداد را از مصرف‌کننده‌های علاقه‌مند جدا می‌کند. برخلاف queue حذف‌شونده، Kafka رکوردها را برای مدت retention یا به‌شکل compact بر اساس key در log افزایشی نگه می‌دارد و consumer از روی offset غیرمخرب می‌خواند. بنابراین می‌توان consumer جدیدی افزود که تاریخچه را replay کند، projection را بعد از خرابی بازسازی کند و تغییر وضعیت را بین سرویس‌ها پخش کند. تولیدکننده لازم نیست از consumerها خبر داشته باشد. قانون retention/deletion همچنان مهم است؛ از جمله نیازهای privacy. tombstone در topic فشرده‌شده مقدار قبلی را برای حذف بعدی علامت می‌زند.
+
+Kafka یک log پایدار توزیع‌شده است؛ brokerها نسبتاً ساده‌اند و clientها offset مصرف را مدیریت می‌کنند. producer رکوردها را buffer و batch می‌کند تا در برابر کمی latency کمتر، round-trip شبکه و نوشتن کوچک کمتر شود. تنظیم تأیید، retry و تولید idempotent روی گم‌شدن یا تکراری‌شدن اثر دارد. consumer دسته‌ای poll و offset را commit می‌کند: commit پیش از پردازش ممکن است بعد از crash کار را رد کند؛ commit پس از پردازش رفتار at-least-once می‌دهد و اگر اثر موفق بوده ولی commit نشده، پیام دوباره می‌رسد. پس consumer باید idempotent باشد یا در صورت پشتیبانی offset و وضعیت تجاری را اتمی هماهنگ کند. API مصرف‌کننده thread-safe نیست؛ پردازش موازی به هماهنگی صریح ترتیب و commit نیاز دارد.
+
+topic به partitionهایی تقسیم و بین brokerها پخش می‌شود. producer با hash کردن key، رویداد را به partition می‌فرستد؛ ترتیب برای همان key داخل partition حفظ می‌شود، اما ترتیب کلی بین partitionها وجود ندارد. partition بیشتر موازی‌سازی نوشتن/خواندن و consumer group را بالا می‌برد، ولی منبع broker و برنامه‌ریزی ظرفیت می‌خواهد. تعداد partition را معمولاً نمی‌توان کم کرد؛ زیادکردنش می‌تواند رویدادهای آیندهٔ یک key را به partition دیگری بفرستد و فرض ترتیب آن key را از آن نقطه به بعد عوض کند. در هر consumer group هر partition به حداکثر یک consumer فعال اختصاص می‌یابد؛ consumer کمتر چند partition را شریک می‌شود و consumer اضافه بیکار می‌ماند. تغییر اعضا rebalance می‌آورد که ممکن است مالکیت partition را جابه‌جا یا موقتاً پردازش را مکث دهد.
+
+replication factor برابر N برای هر partition کپی leader/follower می‌سازد. producer و consumer به leader وصل می‌شوند؛ in-sync replica (ISR) followerهایی را مشخص می‌کند که به‌اندازهٔ کافی همگام‌اند تا پس از شکست نامزد رهبر شوند. `acks=all` و `min.insync.replicas` دوام و latency را با availability نوشتن مبادله می‌کنند. اگر ISR لازم نتواند تأیید بدهد، نوشتن شکست می‌خورد تا تضمین تنظیم‌شده بی‌صدا ضعیف نشود. Kafka برای capture پرحجم رویداد، replay، integration و buffer کردن جهش بار مناسب است؛ اما اثر روی دیتابیس خارجی را exactly-once نمی‌کند و منطق کسب‌وکار را اجرا نمی‌کند. lag و سلامت broker را کنار idempotency اثر، تکامل schema، retention و ظرفیت پایین‌دست پایش کن.
 
 ### نکته‌های کلیدی
 
-- تعداد partition سقف موازی‌سازی گروه است؛ key ترتیب هر موجودیت را می‌دهد.
-- commit، retry، replay و write پایین‌دست را برای صحت با هم طراحی کن.
-- کنار سلامت broker، lag را ببین؛ Kafka منطق کسب‌وکار را اجرا نمی‌کند.
+- log از روی offset نگه‌داری و دوباره خوانده می‌شود؛ queue حذف‌شونده نیست.
+- key محل partition و مرز ترتیب را تعیین می‌کند؛ تعداد partition سقف consumer مفید هر گروه است.
+- commit پس از پردازش رفتار at-least-once دارد؛ اثرهای تجاری را در برابر پیام تکراری امن کن.
+- retention، compaction/tombstone، replication/ISR و rebalance بخشی از قرارداد برنامه‌اند.
+- lag و ظرفیت پایین‌دست را کنار سلامت broker پایش کن؛ Kafka رویداد ذخیره می‌کند و برنامه منطق تجاری را اجرا می‌کند.
 
 
 ## امکانات

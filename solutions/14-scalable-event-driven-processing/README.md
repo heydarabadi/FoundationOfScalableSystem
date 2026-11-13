@@ -41,13 +41,21 @@ This implementation is a hands-on example of application services and asynchrono
 
 **Source reading: printed pages 271–284.** Original learning summary of the chapter's listed ideas; consult the book for full treatment.
 
-Event-driven architecture decouples producers and consumers through events. Kafka supplies a persistent partitioned log: topics organize records, producers publish them, and consumer groups coordinate processing with offsets. Partition keys affect ordering and parallelism; within one group, each partition is assigned to at most one consumer at a time, so extra consumers can be idle. Replication and acknowledgements affect durability and availability; retention and replay support recovery. Scaling must consider partitions, lag, downstream capacity, and duplicate-safe effects. Kafka stores and transports events; business behavior remains in application code.
+Event-driven architecture uses immutable facts about things that happened to decouple the event source from interested consumers. Unlike a destructive queue, Kafka retains records in an append-only log for a configured period (or compacts by key), and consumers read nondestructively from offsets. This makes it possible to add a new consumer that replays history, rebuild a projection after a failure, and use the event log to distribute state changes among services. The event source does not need to know which consumers exist. Retention and deletion rules still matter, including privacy requirements; tombstones in compacted topics mark older values for later removal.
+
+Kafka is a distributed persistent log with relatively simple brokers and clients that manage their offsets. Producers buffer and batch records, trading a small amount of latency for fewer network round trips and larger disk writes. Acknowledgement settings, retries, and idempotent production affect loss and duplicate behavior. Consumers poll batches and commit offsets: committing before processing risks skipping work after a crash; committing after processing gives at-least-once delivery and can replay records if the side effect succeeded but the commit did not. Therefore consumers must be idempotent or atomically coordinate offset and business state where supported. The consumer API is not thread-safe, so parallel processing needs explicit ordering and commit coordination.
+
+Topics are split into partitions distributed across brokers. A producer key is hashed to a partition, which preserves order for that key within the partition; there is no total ordering across partitions. More partitions allow more write/read parallelism and group consumers, but require more broker resources and careful capacity planning. Partitions generally cannot be reduced, and increasing them can move future records for a key to a different partition, changing per-key ordering assumptions across that boundary. Within one consumer group a partition is assigned to at most one active consumer; fewer consumers share multiple partitions, while extra consumers are idle. Membership changes trigger rebalances that may temporarily pause or move partition ownership.
+
+Replication factor N creates leader/follower copies for each partition. Producers and consumers use the leader; in-sync replicas (ISR) track followers caught up enough to be candidates after failure. `acks=all` and `min.insync.replicas` trade durability and latency against write availability. If the required ISR count cannot acknowledge, writes fail instead of silently weakening the configured guarantee. Kafka enables high-throughput event capture, replay, integration, and buffering bursts from downstream services, but it does not make external database effects exactly-once or perform business processing itself. Pair lag and broker health with idempotent effects, schema evolution, retention, and downstream-capacity limits.
 
 ### Key takeaways
 
-- Partition count bounds group parallelism; keys govern per-entity order.
-- Design commits, retries, replay, and downstream writes together for correctness.
-- Lag matters alongside broker health; Kafka does not implement business processing.
+- Logs are retained and reread by offsets; they are not destructive queues.
+- A key defines partition placement and the boundary for ordering; partition count bounds useful consumers per group.
+- Commit-after-processing gives at-least-once behavior; protect side effects from duplicates.
+- Retention, compaction/tombstones, replication/ISR, and rebalances are part of the application contract.
+- Observe consumer lag and downstream capacity alongside broker health; Kafka stores events, while applications execute business logic.
 
 
 ## At a glance

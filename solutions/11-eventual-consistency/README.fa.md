@@ -16,9 +16,15 @@
 
 ## خلاصهٔ جامع فصل
 
-**بخش متناظر در نسخهٔ PDF: صفحه‌های چاپی 205–221.** جمع‌بندی آموزشی با بیان تازه از ایده‌های فصل؛ برای شرح کامل به کتاب مراجعه کن.
+**بخش متناظر در نسخهٔ PDF: صفحه‌های چاپی 205–222.** این جمع‌بندی با بیان خودمان نوشته شده است؛ برای شرح کامل به کتاب مراجعه کن.
 
-سازگاری نهایی اختلاف موقت replicaها را در زمان انتشار update می‌پذیرد. پنجرهٔ ناسازگاری بر رفتار کاربر اثر می‌گذارد؛ read-your-writes می‌تواند تضمین محلی بدهد بدون آن‌که توافق فوری جهانی باشد. consistency قابل تنظیم و quorum read/write تعداد replicaهای مشارکت‌کننده را عوض می‌کند و روی latency و تازگی اثر دارد. replica repair updateهای ازدست‌رفته را هماهنگ می‌کند. write هم‌زمان تعارض می‌سازد: last-writer-wins ساده است ولی ممکن است نیت را حذف کند؛ version vector هم‌زمانی را آشکار می‌کند. برنامه باید staleness قابل قبول و حل تعارض درست در دامنه را تعریف کند.
+Replication پایگاه‌داده را به یک سیستم توزیع‌شده تبدیل می‌کند: تأخیر شبکه، overload، خرابی و فاصلهٔ جغرافیایی باعث می‌شوند replicaها موقتاً متفاوت شوند. inconsistency window مدت رسیدن یک تغییر به همهٔ replicaهاست؛ هنگام شکست دلخواه حد بالای تضمین‌شده‌ای ندارد و با تعداد replica، بار و فاصله بیشتر می‌شود. این فقط جزئیات درون دیتابیس نیست؛ روی چیزی که کاربر می‌بیند اثر می‌گذارد. read-your-own-writes (RYOW) تضمین محدودتری است: پس از تغییر یک داده توسط کاربر، خواندن بعدی همان تغییر را می‌بیند، حتی اگر دیگران هنوز نسخهٔ قدیمی را ببینند. پیاده‌سازی ممکن است read را به leader بفرستد یا bookmark/version نوشتن را همراه read بعدی کند.
+
+consistency قابل تنظیم انتخاب latency و تازگی را روشن می‌کند. برای N replica، مقدار W تعداد تأییدهای لازم برای write و R تعداد replicaهای خوانده‌شده پیش از پاسخ است. W بیشتر latency نوشتن را زیاد و هنگام قطع nodeها availability را کم می‌کند؛ R بیشتر هزینهٔ read را بالا می‌برد اما شانس یافتن نسخهٔ تازه‌تر را بیشتر می‌کند. quorum اکثریت است: (N/2)+1؛ اگر quorum خواندن و نوشتن هم‌پوشانی داشته باشند (R + W > N)، read می‌تواند به replicaای برسد که write موفق را دیده است. این تضمین به ترتیب نسخه و پیاده‌سازی quorum در خود دیتابیس وابسته است. sloppy quorum وقتی replica اصلی در دسترس نیست، write را روی node جایگزین می‌پذیرد؛ availability را بهتر می‌کند ولی تا زمان hinted handoff که داده را به replica اصلی برمی‌گرداند، read کهنه ممکن است.
+
+miss شدن update، توقف node، خرابی دیسک/شبکه یا bug باعث drift replica می‌شود. active/read repair هنگام read نسخه‌ها را مقایسه و replica کهنه را اصلاح می‌کند؛ digest/hash read می‌تواند انتقال داده را کم کند. passive anti-entropy داده‌ها را دوره‌ای بررسی می‌کند؛ معمولاً از Merkle tree استفاده می‌شود تا شاخه‌های یکسان دوباره ارسال نشوند. repair، CPU و حافظه و شبکه و disk I/O مصرف می‌کند و باید با توجه به بار production زمان‌بندی یا محدود شود.
+
+در نوشتن leaderless ممکن است دو کاربر همزمان یک key را تغییر دهند. last-writer-wins ساده است ولی timestamp ترتیب علّی واقعی را ثابت نمی‌کند: اختلاف ساعت می‌تواند برنده را تصادفی کند و تغییر معتبر دیگری را بی‌صدا حذف کند. کنترل version می‌تواند write کهنه را رد کند؛ version vector رابطهٔ علّی replicaها را ثبت می‌کند و «نسخه‌های هم‌زمان» را برای merge برنامه یا تصمیم کاربر آشکار می‌کند. CRDT برای نوع دادهٔ مناسب، قواعد merge دارد که با concurrency همگرا می‌شود (مثلاً counter/set) و کار دستی تعارض را کم می‌کند؛ اما فقط وقتی معناهای نوع داده با دامنه جور باشند. قرارداد عملی باید بگوید کدام فیلد ممکن است کهنه باشد، آیا کاربر RYOW لازم دارد، ویرایش همزمان چگونه ادغام می‌شود و چه داده‌ای نباید بی‌صدا overwrite شود.
 
 ### نکته‌های کلیدی
 
@@ -28,9 +34,10 @@
 
 ### پوشش موضوع‌های اصلی فصل
 
-- سازگاری نهایی و پنجرهٔ ناسازگاری، از جمله read-your-writes.
-- consistency قابل تنظیم و quorum read/write؛ repair فعال و غیرفعال replica.
-- حل تعارض با last-writer-wins و version vector و مصالحه‌های هرکدام.
+- تأخیر انتشار replica و inconsistency window؛ read-your-writes با خواندن از leader/bookmark.
+- consistency قابل تنظیم N/R/W، هم‌پوشانی quorum اکثریت، مصالحهٔ availability/latency، sloppy quorum و hinted handoff.
+- read repair فعال و anti-entropy غیرفعال با Merkle tree.
+- تعارض write همزمان، محدودیت last-writer-wins، version/version vector، sibling، merge برنامه و همگرایی CRDT.
 
 ## برنامهٔ application پیشنهادی
 
@@ -41,16 +48,28 @@
 
 ## تمرین عملی
 
-Simulate replicated reads and delayed updates; write down which stale reads the product can tolerate and how clients recover.
+یک مدل کوچک profile یا سبد خرید با primary/replica شبیه‌سازی‌شده بساز و بعد آن را با دیتابیسی که consistency قابل تنظیم دارد مقایسه کن. تأخیر انتشار و ویرایش همزمان را تزریق کن. هدف این است که قرارداد consistency قابل مشاهدهٔ کاربر را تعریف و آزمایش کنیم، نه این‌که الگوریتم replication جدیدی برای production بسازیم.
 
-۱. عملیات، شکل بار، اندازهٔ داده و invariant صحت را بنویسیم.
-۲. قبل از افزودن تکنیک مقیاس‌دهی، baseline ساده بسازیم.
-۳. هر بار فقط یک انتخاب اصلی را تغییر دهیم و همان workload را تکرار کنیم.
-۴. نتیجهٔ خام، مشخصات محیط، نسخه‌ها و فرمان دقیق اجرا را نگه داریم.
+۱. یک رکورد، عملیات read/write، مدت stale قابل قبول، نیاز RYOW و رفتار تعارض هر فیلد قابل‌تغییر را تعریف کن.
+۲. با N=3 ترکیب‌های W/R مثل (1,1)، (2,2)، (3,1) و (1,3) را تست کن؛ latency و نتیجه را در حالت عادی و وقتی یک replica قطع است ثبت کن.
+۳. quorum معمولی را با sloppy quorum/hinted handoff مقایسه کن و زمان repair پس از بازگشت replica را بسنج.
+۴. دو update همزمان را از یک نسخهٔ قدیمی بفرست. بررسی کن LWW یک ویرایش را حذف می‌کند یا نه، version vector sibling را نشان می‌دهد یا نه و merge دامنه/CRDT نتیجهٔ مورد انتظار می‌دهد یا نه.
+۵. trace قطعی نگه دار تا همان interleaving و شکست دوباره اجرا شود؛ ترتیب علّی را فقط از timestamp ساعت دیواری نتیجه نگیر.
+
+### انتخاب‌های راه‌حل قابل پیاده‌سازی
+
+| راه‌حل | چه زمانی انتخابش کنیم | شکل اجرایی | هزینه‌ها و محدودیت‌ها |
+|---|---|---|---|
+| خواندن از leader برای RYOW و خواندن replica برای دادهٔ قابل‌تأخیر | کاربر باید بلافاصله تغییر خودش را ببیند ولی دیگران می‌توانند بعداً ببینند | write به leader → برگشت version/bookmark → read بعدی همان کاربر به leader می‌رود یا تا رسیدن replica صبر می‌کند؛ readهای دیگر از follower | read بیشتری روی leader می‌آید؛ session/bookmark و fallback باید طراحی شود |
+| read/write از نوع quorum | بین تازگی، latency و availability داده‌های replicaشده trade-off لازم است | store با N replica و تنظیم R/W برای هر درخواست؛ هم‌پوشانی majority و شکست هنگام نبود quorum را آزمایش کن | latency بیشتر و شکست درخواست بدون quorum؛ sloppy quorum تازگی را ضعیف می‌کند |
+| read model یا cache projection نهایی | UI یا analytics تأخیر را می‌پذیرد و write باید در دسترس بماند | تراکنش منبع حقیقت/outbox → event stream → projection هر view؛ updated-at/version و مسیر refresh/rebuild | هنگام خرابی طولانی زمان همگرایی تضمین نیست؛ duplicate، ترتیب و repair projection مهم‌اند |
+| دادهٔ مشارکتی با تشخیص تعارض | ویرایش همزمان مستقل متداول است و باید ادغام شود | optimistic version token با پاسخ تعارض و UI ادغام، یا CRDT متناسب برای عملیات commutative | version vector/sibling یا semantics CRDT metadata و پیچیدگی می‌آورد؛ LWW برای تغییر مهم امن نیست |
+
+برای موجودی، پرداخت یا ماندهٔ حساب، صرفاً به‌خاطر throughput سراغ معنای eventual نرو. invariantهای اصلی را در منبع تراکنشی نگه دار و viewهای کم‌حساسیت را ناهمگام projection کن.
 
 ## چه چیزهایی را اندازه بگیریم
 
-Staleness duration, convergence time, conflict count, read-your-writes success, and availability during partition.
+staleness مشاهده‌شده و زمان همگرایی، موفقیت RYOW، نرخ شکست quorum، مدت/حجم repair، شمار تعارض و update ازدست‌رفته و availability هنگام partition.
 
 حداقل p50/p95/p99 latency، throughput، خطا، CPU، حافظه و رفتار هنگام یک شکست مرتبط را گزارش کنیم. ادعای اندازه‌گیری‌نشده را با وضعیت **اندازه‌گیری نشده** مشخص کنیم.
 

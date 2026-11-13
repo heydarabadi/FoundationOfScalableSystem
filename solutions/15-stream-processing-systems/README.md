@@ -14,9 +14,15 @@ Stream platforms; event time; stateful windows and joins; scalability; checkpoin
 
 ## Chapter synthesis
 
-**Source reading: printed pages 287–300.** Original learning summary of the chapter's listed ideas; consult the book for full treatment.
+**Source reading: printed pages 287–301.** Original learning summary of the chapter's ideas; consult the book for full treatment.
 
-Stream processing continuously computes over event flows. Platforms such as Flink provide transformations, windows, and stateful operators through models such as DataStream. Parallelism depends on partitioning and topology; event-time progress and late arrivals affect window results. Recovery uses checkpoints and replay, so data safety depends on aligning state snapshots, source positions, and sink behavior. Throughput, latency, state size, checkpoint overhead, and recovery time interact. Use stream processing for continuous aggregation, joins, or temporal analysis; a simple consumer may suffice for independent messages.
+Stream processing computes continuously over data-in-motion, reducing the delay of a batch ETL pipeline when results must reflect recent events. Batch remains useful for large historical recomputation and workloads that tolerate minutes or hours of freshness delay. The Lambda architecture combines a periodic batch layer and a low-latency speed layer, then serves both; the chapter notes that a durable event log plus replayable stream processing can simplify this into a Kappa-style design for many workloads. These are architectural choices, not one mandatory product stack.
+
+A streaming application is a directed acyclic dataflow from sources through transformations to sinks. Stateless operators transform independent events; stateful operators retain keyed data across events, for example counts, model features, or the latest bus locations. Windows turn an unbounded stream into finite computations: tumbling windows use disjoint intervals, while sliding windows overlap. The chapter's Flink example groups lift events by lift ID and computes a ten-minute rolling total every five minutes. A production design must also choose the time basis and policy for out-of-order/late events; the book’s core demonstration emphasizes processing-time windows and keyed aggregation.
+
+Flink compiles the logical dataflow into a physical DAG. Parallelism is set per operator or as a default, and keyed partitioning routes events for the same key to a state owner. Task managers execute operator subtasks in task slots; operator chaining can reduce communication overhead. Higher parallelism improves throughput only when source partitions, network, CPU, and sink capacity can keep up. A global/single operator can become the bottleneck.
+
+Stateful processing needs consistent recovery. Flink persists operator state and periodically checkpoints the complete dataflow. Stream barriers travel with source records; each operator snapshots state at the same input position, and a completed checkpoint ties state to source offsets. After failure, the job restores state and resumes after the checkpointed position. This prevents arbitrary gaps in the stream computation, but checkpoint storage and frequency consume I/O and can affect throughput, especially with large state. End-to-end effects also depend on the sink: replay after recovery can duplicate external writes unless the sink is transactional or idempotent. Measure checkpoint duration, failure recovery, event lag, state size, and sink correctness together.
 
 ### Key takeaways
 
@@ -26,9 +32,10 @@ Stream processing continuously computes over event flows. Platforms such as Flin
 
 ### Coverage of chapter topics
 
-- Streaming as continuous computation on data in motion.
-- Platforms and Flink DataStream: operators, state, and execution topology.
-- Scalability and data safety through partitioning, checkpoints, and recovery.
+- Batch ETL freshness limits, streaming use cases, and Lambda versus log/replay-oriented Kappa architecture.
+- Dataflow DAGs, stateless/stateful operators, keyed state, tumbling/sliding windows, and time-sensitive results.
+- Flink DataStream source/transform/sink model, keyed partitioning, operator parallelism, task slots, task managers, and operator chaining.
+- State persistence, stream-barrier checkpoints aligned with source positions, restore/replay, and sink-side duplicate safety.
 
 ## Proposed application
 
@@ -39,16 +46,28 @@ Stream processing continuously computes over event flows. Platforms such as Flin
 
 ## Practical exercise
 
-Build one windowed aggregation or join with replayable input; compare event time and processing time and recover from a restart.
+Build a Flink job reading purchase events from Kafka, keyed by `productId`, producing a rolling five-minute sales total every minute to a database or Kafka output. Add a late/out-of-order test stream and a restartable state checkpoint. Compare this stateful job with a simple Kafka consumer that only validates and routes independent records; this establishes whether the extra stream runtime is justified.
 
-1. Write down the operation, workload shape, data size, and correctness invariant.
-2. Establish a simple baseline before adding the chapter's scaling technique.
-3. Change one major design choice at a time and repeat the same workload.
-4. Save raw results, environment details, versions, and the exact run command.
+1. Define the result semantics: processing-time or event-time, window size/slide, allowed lateness, and how late events revise or do not revise prior output.
+2. Key the stream by the entity whose operations must be serialized. Set operator parallelism no higher than useful source partitions unless repartitioning is intentional.
+3. Configure durable checkpoint storage and interval. Fail a task manager after state changes and verify restart resumes from the matching source position without losing counts.
+4. Make the sink idempotent using a deterministic window/key/version or transactional sink; inject a crash after output but before checkpoint completion and verify no incorrect duplicate aggregate.
+5. Vary parallelism and checkpoint interval separately; report throughput, event lag, p99 processing delay, checkpoint time, state bytes, recovery duration, and sink writes.
+
+### Implementable solution choices
+
+| Solution | Choose it when | Concrete shape | Main costs / caveats |
+|---|---|---|---|
+| Kafka Streams / simple consumer | Transformations are modest and the app should stay close to Kafka deployment | Kafka topic → keyed .NET/Java consumer or Kafka Streams topology → compacted/result topic or database | Less rich distributed state/window management than a dedicated engine; application handles state/rebalance/recovery details |
+| Apache Flink stateful stream | Large state, event-time windows, joins, or checkpointed recovery are core requirements | Kafka source → keyed/windowed operators → checkpointed Flink cluster → transactional/idempotent sink | Job manager/task manager ops, checkpoint storage, state sizing and tuning; sink semantics must be proven |
+| Batch + speed (Lambda) | Existing batch truth and historical recompute must coexist with urgent recent results | Durable event archive → periodic batch recompute + streaming fast view → serving layer merges/reconciles | Two implementations can disagree; duplicate business logic and reconciliation are costly |
+| Log replay (Kappa-style) | One durable event log can be replayed to rebuild all derived state | Kafka retention/archive → versioned stream job → projections; redeploy/replay to recompute | Replay duration/capacity and schema evolution need planning; external side effects must be guarded |
+
+Use a stream engine for keyed state, temporal windows, joins, or coordinated checkpoint recovery. For independent message handling, keep a regular consumer and avoid adding a second runtime without evidence.
 
 ## What to measure
 
-End-to-end lag, event-time lateness, throughput, state size, checkpoint duration, and replay correctness.
+End-to-end event lag, late/out-of-order event count, throughput, operator skew, state size, checkpoint duration/failures, recovery time, sink idempotency, and replay correctness.
 
 Report at least p50/p95/p99 latency, throughput, errors, CPU, memory, and behavior during one relevant failure. Mark any unmeasured claim as **Not measured**.
 

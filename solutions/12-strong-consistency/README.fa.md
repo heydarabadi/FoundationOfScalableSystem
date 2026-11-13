@@ -16,9 +16,15 @@
 
 ## خلاصهٔ جامع فصل
 
-**بخش متناظر در نسخهٔ PDF: صفحه‌های چاپی 223–244.** جمع‌بندی آموزشی با بیان تازه از ایده‌های فصل؛ برای شرح کامل به کتاب مراجعه کن.
+**بخش متناظر در نسخهٔ PDF: صفحه‌های چاپی 223–245.** این جمع‌بندی با بیان خودمان نوشته شده است؛ برای شرح کامل به کتاب مراجعه کن.
 
-سازگاری قوی عملیات را طبق مدل تعریف‌شده مرتب می‌کند و برخی استدلال‌های برنامه را ساده می‌سازد، اما هزینهٔ هماهنگی دارد. transaction توزیع‌شده مشارکت‌کننده‌ها را هماهنگ می‌کند؛ two-phase commit مرحلهٔ prepare و commit دارد اما هنگام خرابی ممکن است متوقف یا نیازمند بازیابی شود. consensus با فرض‌های روشن توافق می‌سازد؛ Raft از leader و log تکثیرشده استفاده می‌کند، پس انتخاب leader و پیشروی log روی latency و availability اثر دارند. VoltDB و Spanner نمونه‌هایی با سازوکارهای متفاوت‌اند. پیش از انتخاب، invariant، فرض شکست، دامنهٔ transaction و بودجهٔ latency را مشخص کن.
+فصل دو مفهومی را جدا می‌کند که هر دو گاهی «strong consistency» نامیده می‌شوند. سازگاری تراکنشی یعنی transaction چندموردی invariant کسب‌وکار را اتمی نگه می‌دارد؛ سازگاری replica یعنی همهٔ مشتری‌ها مستقل از replica مقدار commitشدهٔ یکسان ببینند. ACID شامل atomicity، سازگاری تعریف‌شده با منطق کسب‌وکار، isolation و durability است. serializability یعنی transactionهای همزمان معادل یک ترتیب سری باشند؛ linearizability علاوه بر آن ترتیب زمان واقعی را برای عملیات روی یک شیء رعایت می‌کند. ترکیبشان strict serializability/external consistency می‌دهد، اما هماهنگی می‌خواهد.
+
+two-phase commit (2PC) تراکنش توزیع‌شده را هماهنگ می‌کند: شرکت‌کننده‌ها ابتدا prepare می‌شوند و تضمین می‌کنند می‌توانند commit کنند؛ سپس coordinator نتیجهٔ commit یا abort را اعلام می‌کند. خرابی شرکت‌کننده از روی log قابل بازیابی است، ولی خرابی coordinator بعد از prepare ممکن است شرکت‌کننده‌ها را در حالی که lock نگه داشته‌اند منتظر نتیجه بگذارد. این کار availability را کم و ممکن است timeoutهای بالادست را زنجیره‌ای کند. تکثیر وضعیت coordinator و بازیابی آن به consensus نیاز دارد، نه صرفاً retry.
+
+consensus بین replicaها ترتیب یکسان update می‌سازد. Raft الگوریتم log تکثیرشده با رهبر است: leader نوشتن‌های client را مرتب می‌کند، followerها entry را پایدار می‌کنند و quorum اکثریت آن را commit می‌کند. heartbeat نبود رهبر را نشان می‌دهد؛ candidate با term، تازگی log و رأی اکثریت leader می‌شود. quorum اجازه می‌دهد پس از برخی خرابی nodeها ادامه دهیم، اما بدون اکثریت پیشروی متوقف است. replication و انتخاب رهبر round-trip شبکه می‌خواهند و هنگام بازیابی ممکن است write مکث کند؛ Raft/Paxos با فرض‌های معین توافق می‌سازند، نه در برابر partition دائمی دلخواه.
+
+مثال‌ها روش‌های متفاوتی برای کم‌کردن یا مدیریت هماهنگی نشان می‌دهند. VoltDB پارتیشن را به CPU core وصل و stored procedureها را در هر پارتیشن سری اجرا می‌کند؛ transaction تک‌پارتیشن از 2PC بین‌پارتیشنی دوری می‌کند، ولی کار چندپارتیشنی پرهزینه‌تر است. چون داده در حافظه است، command log و snapshot برای durability لازم‌اند. Spanner جدول را به splitهای بازه‌ای تکثیرشده تقسیم می‌کند، برای هر گروه replica از Paxos و بین splitها از 2PC استفاده می‌کند و با timestamp commit، سرویس زمان با خطای محدود و commit-wait، external consistency می‌دهد. تضمین قوی، stale-read و تعارض‌های برنامه را کم می‌کند، اما دیتابیس هزینهٔ هماهنگی، lock، latency و پیچیدگی عملیاتی را می‌پردازد. transactionهای قوی را کوچک نگه دار و در صورت امکان partition key را با مرز transactionهای متداول هم‌راستا کن.
 
 ### نکته‌های کلیدی
 
@@ -28,9 +34,10 @@
 
 ### پوشش موضوع‌های اصلی فصل
 
-- مدل‌های سازگاری قوی و تراکنش توزیع‌شده.
-- two-phase commit و حالت‌های شکست؛ الگوریتم consensus، Raft و انتخاب leader.
-- نمونه‌های عملی سازگاری قوی: VoltDB و Google Cloud Spanner.
+- ACID، serializability، linearizability و strict/external consistency.
+- تراکنش توزیع‌شده با 2PC prepare/resolve، بازیابی participant و پیامدهای توقف coordinator/lock.
+- safety/liveness در consensus، log ماشین حالت تکثیرشده، term/quorum/election در Raft و جایگاه Paxos.
+- transaction تک‌پارتیشنی/چندپارتیشنی VoltDB و split replication، Paxos، 2PC و commit-wait در Spanner.
 
 ## برنامهٔ application پیشنهادی
 
@@ -41,16 +48,27 @@
 
 ## تمرین عملی
 
-Compare a single-database transaction with a distributed transaction scenario; force participant failure and inspect recovery.
+عملیات رزرو موجودی و ثبت سفارش را بساز. transaction اتمی PostgreSQL، transaction دیتابیس SQL توزیع‌شده بین دو partition، و جایگزین saga ناهمزمان/outbox را مقایسه کن. invariant ثابت باشد: سفارش پذیرفته‌شده بیشتر از موجودی رزرو نکند و سفارش پرداخت‌شده اعلام نشود مگر مرحلهٔ پرداخت موفق شده باشد.
 
-۱. عملیات، شکل بار، اندازهٔ داده و invariant صحت را بنویسیم.
-۲. قبل از افزودن تکنیک مقیاس‌دهی، baseline ساده بسازیم.
-۳. هر بار فقط یک انتخاب اصلی را تغییر دهیم و همان workload را تکرار کنیم.
-۴. نتیجهٔ خام، مشخصات محیط، نسخه‌ها و فرمان دقیق اجرا را نگه داریم.
+۱. پیش از انتخاب دیتابیس، دامنهٔ transaction، isolation level، partition key و invariant دقیق را تعریف کن.
+۲. رزرو همزمان روی یک key و بین keyهای چند partition اجرا کن؛ عدم oversell و latency تک‌پارتیشنی/چندپارتیشنی را بسنج.
+۳. خرابی participant/node را پیش از prepare، پس از prepare و حین commit تزریق کن. ماندن lock، retry، resolve و نتیجهٔ قابل‌مشاهده برای client را ببین.
+۴. latency و throughput موفق را با زمان recovery و availability هنگام از دست‌رفتن quorum مقایسه کن. درخواست‌ها را با idempotency key retry کن.
+۵. در saga، هر مرحله و compensation را پایدار کن، همهٔ مرحله‌ها را idempotent بساز و وضعیت pending/failed را نشان بده؛ وانمود نکن کل workflow یک transaction اتمی است.
+
+### انتخاب‌های راه‌حل قابل پیاده‌سازی
+
+| راه‌حل | چه زمانی انتخابش کنیم | شکل اجرایی | هزینه‌ها و محدودیت‌ها |
+|---|---|---|---|
+| transaction رابطه‌ای واحد | invariantها در یک دیتابیس جا می‌شوند و حجم درخواست در یک primary می‌گنجد | .NET API → transaction در PostgreSQL که موجودی را رزرو و سفارش/payment intent را اتمی ثبت می‌کند | صحت ساده‌تر؛ سقف write و availability primary باقی است |
+| transaction SQL توزیع‌شده | یک invariant اتمی بین partition/region امتداد دارد و نتیجهٔ stale/نیمه‌کاره پذیرفتنی نیست | SQL مانند CockroachDB/YugabyteDB/Cloud Spanner؛ تا حد امکان partition بر order/tenant و محدودکردن کار بین partitionها | consensus و 2PC latency می‌افزایند؛ نبود quorum نوشتن را متوقف می‌کند؛ هزینهٔ سرویس/ابر |
+| saga ناهمزمان با outbox | workflow از سرویس/providerهای مستقل عبور می‌کند و تکمیل نهایی با تأخیر قابل‌قبول است | Order DB + outbox → orchestrator → رزرو موجودی → مجوز پرداخت → تأیید؛ در شکست release/void جبرانی | transaction واحد ACID نیست؛ وضعیت pending، recovery timeout، idempotency و reconciliation لازم است |
+
+transaction توزیع‌شده را فقط وقتی به‌کار ببر که invariant واقعاً بین participantهاست و بودجهٔ latency/availability اجازه می‌دهد. در غیر این صورت transaction محلی همراه workflow ناهمزمان معمولاً ساده‌تر اداره می‌شود.
 
 ## چه چیزهایی را اندازه بگیریم
 
-Commit latency, abort rate, lock duration, availability during failure, and invariant violations.
+latency commit بر حسب تعداد partition، نرخ abort/retry، مدت lock، زمان توقف هنگام خرابی coordinator/leader، availability quorum، زمان recovery و نقض invariant.
 
 حداقل p50/p95/p99 latency، throughput، خطا، CPU، حافظه و رفتار هنگام یک شکست مرتبط را گزارش کنیم. ادعای اندازه‌گیری‌نشده را با وضعیت **اندازه‌گیری نشده** مشخص کنیم.
 
