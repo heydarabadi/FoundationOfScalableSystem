@@ -24,6 +24,12 @@ The final chapter highlights practices that sustain scalable systems: automation
 - Observe outcomes and saturation, not merely process health.
 - Keep analytical storage distinct from transactional systems and revisit assumptions.
 
+### Coverage of chapter topics
+
+- Automation and repeatable delivery/operations.
+- Observability and deployment-platform choices for operating at scale.
+- Data lakes and the closing practice of learning from evidence and revisiting decisions.
+
 ## Proposed application
 
 - **Application / solution name:** `ScalabilityEvidenceKit`.

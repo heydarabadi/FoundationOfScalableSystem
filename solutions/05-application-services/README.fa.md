@@ -26,6 +26,12 @@
 - readiness، liveness، load balancing و elasticity سازوکارهای جدا هستند.
 - scale کردن API به ظرفیت وابستگی‌ها هم نیاز دارد.
 
+### پوشش موضوع‌های اصلی فصل
+
+- قرارداد سرویس و API، مرز طراحی و مالکیت state برنامه.
+- application server، تکثیر افقی، load balancer و سیاست توزیع.
+- پایش سلامت، elasticity و هزینهٔ throughput/failover در session affinity.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `ScalableApplicationServicesLab`.

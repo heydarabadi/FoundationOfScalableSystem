@@ -15,6 +15,8 @@ Each approach belongs in its own `solutions/<solution-name>/` directory with its
 
 ## Chapter solution guides
 
+To compare complete architectures for the basket and order workload, start with the [English implementable blueprints](IMPLEMENTABLE-SOLUTION-BLUEPRINTS-EN.md) or [Persian version](IMPLEMENTABLE-SOLUTION-BLUEPRINTS-FA.md). These are designs; Chapter 14 is the only currently runnable solution.
+
 Each chapter has a bilingual README and its own original SVG concept diagram. Chapters without runnable code yet are explicitly marked as guides/designs; their project and namespace names are proposals until implementation.
 
 | Chapter | Guide |

@@ -24,6 +24,12 @@ Microservices split an application into independently deployable services, but c
 - Network boundaries require timeout, failure handling, and observability.
 - Bulkheads reduce blast radius; each service adds operational work.
 
+### Coverage of chapter topics
+
+- Why microservices emerged; monolithic systems and decomposition choices.
+- Deployment and service design principles, including team/service boundaries.
+- Resilience, cascading failures, and bulkheads to contain resource exhaustion.
+
 ## Proposed application
 
 - **Application / solution name:** `ServiceBoundaryResilienceLab`.

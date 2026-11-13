@@ -26,6 +26,12 @@ serverless اجرای مدیریت‌شده‌ای می‌دهد که با تق�
 - startup، محدودیت اجرا، state بیرونی و concurrency وابستگی را حساب کن.
 - تنظیم را با throughput، latency و هزینهٔ اندازه‌گیری‌شده انجام بده.
 
+### پوشش موضوع‌های اصلی فصل
+
+- تناسب serverless با تقاضای ناپیوسته؛ App Engine Standard و autoscaling.
+- چرخهٔ عمر Lambda، رفتار startup/اجرا و محدودیت‌های مقیاس.
+- مطالعهٔ throughput و هزینه و انتخاب پارامتر بر پایهٔ اندازه‌گیری.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `ServerlessThroughputCostLab`.

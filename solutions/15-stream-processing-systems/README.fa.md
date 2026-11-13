@@ -26,6 +26,12 @@
 - checkpoint، offset و اثر sink را برای recovery هماهنگ کن.
 - stream stateful تحلیل زمانی را می‌دهد اما پیچیدگی عملیاتی می‌افزاید.
 
+### پوشش موضوع‌های اصلی فصل
+
+- streaming به‌عنوان محاسبهٔ پیوسته روی دادهٔ در حال حرکت.
+- پلتفرم‌ها و Flink DataStream: operator، state و توپولوژی اجرا.
+- مقیاس و ایمنی داده با partition، checkpoint و بازیابی.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `StatefulStreamProcessingLab`.

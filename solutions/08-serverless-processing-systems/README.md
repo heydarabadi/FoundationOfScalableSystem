@@ -24,6 +24,12 @@ Serverless offers managed execution that scales with demand, useful for intermit
 - Include startup, execution limits, external state, and downstream concurrency.
 - Tune against measured throughput, latency, and cost.
 
+### Coverage of chapter topics
+
+- Why serverless fits uneven demand; App Engine Standard and autoscaling.
+- Lambda lifecycle, startup/execution behavior, and scalability limits.
+- A throughput/cost case study and choosing parameter values from measurements.
+
 ## Proposed application
 
 - **Application / solution name:** `ServerlessThroughputCostLab`.

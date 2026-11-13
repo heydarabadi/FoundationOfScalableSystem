@@ -24,6 +24,12 @@ Concurrency overlaps progress on tasks and can use processor and I/O resources m
 - Protect invariants and minimize shared mutable state.
 - Bound pools and queues; more threads may increase contention.
 
+### Coverage of chapter topics
+
+- Why concurrency, thread behavior, and nondeterministic execution order matter.
+- Race conditions and deadlocks; thread states and coordination mechanisms.
+- Thread pools, barriers, and thread-safe collections for controlled parallel work.
+
 ## Proposed application
 
 - **Application / solution name:** `ConcurrentExecutionLab`.

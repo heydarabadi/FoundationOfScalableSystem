@@ -26,6 +26,12 @@
 - بازیابی two-phase commit و فرض‌های consensus را بشناس.
 - هماهنگی را جایی به‌کار ببر که صحت لازم دارد و هزینهٔ آن را بسنج.
 
+### پوشش موضوع‌های اصلی فصل
+
+- مدل‌های سازگاری قوی و تراکنش توزیع‌شده.
+- two-phase commit و حالت‌های شکست؛ الگوریتم consensus، Raft و انتخاب leader.
+- نمونه‌های عملی سازگاری قوی: VoltDB و Google Cloud Spanner.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `StrongConsistencyTransactionLab`.

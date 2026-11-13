@@ -24,6 +24,12 @@ Stream processing continuously computes over event flows. Platforms such as Flin
 - Align checkpoints, source offsets, and sink effects for recovery.
 - Stateful streams support temporal computation but add operational complexity.
 
+### Coverage of chapter topics
+
+- Streaming as continuous computation on data in motion.
+- Platforms and Flink DataStream: operators, state, and execution topology.
+- Scalability and data safety through partitioning, checkpoints, and recovery.
+
 ## Proposed application
 
 - **Application / solution name:** `StatefulStreamProcessingLab`.

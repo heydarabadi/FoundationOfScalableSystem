@@ -26,6 +26,12 @@
 - quorum میان latency و تازگی هنگام خرابی trade-off دارد.
 - حل تعارض باید نیت دامنه را حفظ کند، نه فقط timestamp را مقایسه کند.
 
+### پوشش موضوع‌های اصلی فصل
+
+- سازگاری نهایی و پنجرهٔ ناسازگاری، از جمله read-your-writes.
+- consistency قابل تنظیم و quorum read/write؛ repair فعال و غیرفعال replica.
+- حل تعارض با last-writer-wins و version vector و مصالحه‌های هرکدام.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `EventualConsistencyRecoveryLab`.

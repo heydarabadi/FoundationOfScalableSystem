@@ -24,6 +24,12 @@ Eventual consistency permits temporary replica divergence while updates propagat
 - Quorums trade latency and freshness under failure.
 - Conflict handling must preserve domain intent, not just compare timestamps.
 
+### Coverage of chapter topics
+
+- Eventual consistency and the inconsistency window, including read-your-writes.
+- Tunable consistency and quorum reads/writes; replica repair, active and passive.
+- Conflict handling with last-writer-wins and version vectors, including their trade-offs.
+
 ## Proposed application
 
 - **Application / solution name:** `EventualConsistencyRecoveryLab`.

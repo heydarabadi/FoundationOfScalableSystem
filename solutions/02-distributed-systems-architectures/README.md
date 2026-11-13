@@ -24,6 +24,12 @@ The chapter surveys architectural approaches to add capacity. Scale-out distribu
 - Scale tiers independently only when their contracts and boundaries are clear.
 - Distribution adds network and operational failure modes.
 
+### Coverage of chapter topics
+
+- Basic tiers and horizontal scale-out; why independent replicas increase request capacity.
+- Caching and database distribution, including data rebalancing as nodes change.
+- Multiple processing tiers, responsiveness, and the influence of system/hardware choices.
+
 ## Proposed application
 
 - **Application / solution name:** `DistributedArchitectureTradeoffLab`.

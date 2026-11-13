@@ -24,6 +24,12 @@ The chapter compares Redis, MongoDB, and DynamoDB through their data models and 
 - Include persistence, replication, recovery, and operational complexity.
 - Equivalent workload and semantics are prerequisites for a useful benchmark.
 
+### Coverage of chapter topics
+
+- Redis, MongoDB, and DynamoDB data models and APIs.
+- How each distributes and replicates data, and what that means operationally.
+- Strengths/weaknesses tied to access patterns, consistency, and durability needs.
+
 ## Proposed application
 
 - **Application / solution name:** `DistributedDatabaseModelComparisonLab`.

@@ -24,6 +24,12 @@ Distributed databases add nodes for processing or storage, changing data access 
 - Choose NoSQL by model and access pattern.
 - Partition keys affect scale distribution and hot-key risk; CAP concerns partition-time guarantees.
 
+### Coverage of chapter topics
+
+- Distributed database needs and relational scale-up, read replicas, and partitioning.
+- Relational clustering example, NoSQL models, query languages, and data distribution.
+- CAP as reasoning about network partitions and guarantees, not a product ranking.
+
 ## Proposed application
 
 - **Application / solution name:** `ScalableDatabaseFundamentalsLab`.

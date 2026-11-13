@@ -24,6 +24,12 @@ Strong consistency orders operations according to a stated model, simplifying so
 - Know two-phase commit recovery behavior and consensus assumptions.
 - Use coordination where correctness requires it and account for availability and latency costs.
 
+### Coverage of chapter topics
+
+- Strong consistency models and distributed transactions.
+- Two-phase commit and failure modes; consensus algorithms, Raft, and leader election.
+- Practical strong-consistency examples: VoltDB and Google Cloud Spanner.
+
 ## Proposed application
 
 - **Application / solution name:** `StrongConsistencyTransactionLab`.

@@ -14,6 +14,8 @@ This guide applies the book's progression to this transaction-processing example
 
 The existing Kafka/Kubernetes implementation is the worked example for Chapter 14. Other chapter folders are learning guides and proposed experiments, not claims of implemented or benchmarked solutions. Keep measured results, design targets, and future options distinct throughout this document.
 
+For buildable architectures that turn this chapter-based path into concrete systems, see the [Persian solution blueprints](IMPLEMENTABLE-SOLUTION-BLUEPRINTS-FA.md) and [English version](IMPLEMENTABLE-SOLUTION-BLUEPRINTS-EN.md). Each option defines contracts, components, failure flows, a rollout path, and evaluation metrics.
+
 ## 1. Define the problem before choosing technology
 
 | Question | Example definition |

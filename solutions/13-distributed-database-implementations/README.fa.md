@@ -26,6 +26,12 @@
 - persistence، replication، recovery و پیچیدگی عملیات را بسنج.
 - workload و semantics معادل پیش‌شرط benchmark مفید است.
 
+### پوشش موضوع‌های اصلی فصل
+
+- مدل داده و API در Redis، MongoDB و DynamoDB.
+- شیوهٔ توزیع و replication هرکدام و اثر عملیاتی آن.
+- قوت و ضعف بر اساس access pattern، consistency و نیاز دوام.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `DistributedDatabaseModelComparisonLab`.

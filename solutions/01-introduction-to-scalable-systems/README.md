@@ -24,6 +24,12 @@ Scalability is the ability to accommodate growth in work and data while preservi
 - Treat replication and optimization as tools with costs and failure implications.
 - Review performance, availability, security, manageability, and cost together.
 
+### Coverage of chapter topics
+
+- Meaning and historical drivers of scale; replication and optimization as capacity tactics.
+- Cost models and architecture trade-offs across performance, availability, security, and manageability.
+- How workload growth changes bottlenecks and why scale must be validated with evidence.
+
 ## Proposed application
 
 - **Application / solution name:** `ScalabilityWorkloadLab`.

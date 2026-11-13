@@ -11,6 +11,8 @@ This repository is a book-led learning and benchmarking catalog for scalability 
 
 - [System Design — English](docs/SYSTEM-DESIGN-MASTER-EN.md)
 - [طراحی سیستم — فارسی](docs/SYSTEM-DESIGN-MASTER-FA.md)
+- [Implementable solution blueprints — English](docs/IMPLEMENTABLE-SOLUTION-BLUEPRINTS-EN.md)
+- [طرح‌های قابل پیاده‌سازی — فارسی](docs/IMPLEMENTABLE-SOLUTION-BLUEPRINTS-FA.md)
 
 ## Solutions
 

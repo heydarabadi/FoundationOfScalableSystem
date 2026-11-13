@@ -26,6 +26,12 @@ thread و زمان‌بندی؛ race و deadlock؛ هماهنگی؛ thread pool�
 - invariantها را حفظ و state مشترک را کم کن.
 - pool و صف را محدود کن؛ thread بیشتر ممکن است contention بسازد.
 
+### پوشش موضوع‌های اصلی فصل
+
+- چرایی هم‌زمانی، رفتار thread و اهمیت ترتیب اجرای غیرقطعی.
+- race و deadlock؛ وضعیت thread و سازوکارهای هماهنگی.
+- thread pool، barrier و collection ایمن برای کار موازی کنترل‌شده.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `ConcurrentExecutionLab`.

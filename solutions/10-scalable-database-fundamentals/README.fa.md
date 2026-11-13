@@ -26,6 +26,12 @@ scale-up/out رابطه‌ای؛ read replica؛ partitioning؛ مدل‌های N
 - NoSQL را بر اساس مدل و الگوی دسترسی انتخاب کن.
 - partition key توزیع و hot key را تعیین می‌کند؛ CAP دربارهٔ تضمین هنگام partition است.
 
+### پوشش موضوع‌های اصلی فصل
+
+- نیاز پایگاه‌دادهٔ توزیع‌شده و scale-up، read replica و partition در relational.
+- نمونهٔ clustering رابطه‌ای، مدل‌های NoSQL، زبان query و توزیع داده.
+- CAP برای تحلیل partition شبکه و تضمین‌هاست، نه رتبه‌بندی محصول.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `ScalableDatabaseFundamentalsLab`.

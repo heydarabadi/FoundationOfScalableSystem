@@ -24,6 +24,12 @@ Distributed components communicate through networks that can delay, reorder, or 
 - Retries need deadlines and idempotent effects to avoid amplification and duplicates.
 - Clocks and consensus have limits; specify ordering and recovery guarantees.
 
+### Coverage of chapter topics
+
+- Communication fundamentals across hardware and software layers; remote invocation is not local execution.
+- Partial failures, timeouts, and uncertainty in request outcomes.
+- Consensus and distributed time: agreement and ordering require explicit assumptions.
+
 ## Proposed application
 
 - **Application / solution name:** `DistributedFailureSemanticsLab`.

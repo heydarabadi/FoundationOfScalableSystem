@@ -26,6 +26,12 @@ cache نتیجهٔ قابل استفادهٔ مجدد را نزدیک مصرف�
 - HTTP validator انتقال representation بدون تغییر را کم می‌کند.
 - miss، stampede، eviction و ازدست‌رفتن cache را طراحی کن.
 
+### پوشش موضوع‌های اصلی فصل
+
+- تفاوت cache در application و web و محل استفادهٔ دوباره از نسخه‌ها.
+- تازگی و اعتبارسنجی HTTP با Cache-Control، Expires، Last-Modified و ETag.
+- نگرانی‌های صحت: دادهٔ کهنه، invalidation و رفتار cache پس از تغییر.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `DistributedCacheBehaviorLab`.

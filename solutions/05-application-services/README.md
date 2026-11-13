@@ -24,6 +24,12 @@ Application services expose business behavior through APIs and handle concurrent
 - Readiness, liveness, load balancing, and elasticity are distinct mechanisms.
 - Scaling an API requires downstream capacity too.
 
+### Coverage of chapter topics
+
+- Service/API contracts, design boundaries, and ownership of application state.
+- Application servers, horizontal replication, load balancers, and distribution policies.
+- Health monitoring, elasticity, and the throughput/failover costs of session affinity.
+
 ## Proposed application
 
 - **Application / solution name:** `ScalableApplicationServicesLab`.

@@ -26,6 +26,12 @@
 - persistence و replication را بر اساس شکست مورد انتظار انتخاب کن.
 - retry را idempotent و بازیابی پیام poison را قابل مشاهده کن.
 
+### پوشش موضوع‌های اصلی فصل
+
+- primitiveهای پیام‌رسانی، persistence، publish/subscribe و replication.
+- نمونهٔ RabbitMQ: پیام، exchange، queue، توزیع و concurrency.
+- مصالحهٔ ایمنی/کارایی و دسترس‌پذیری؛ competing consumer، مرز exactly-once و پیام poison.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `ReliableAsyncMessagingLab`.

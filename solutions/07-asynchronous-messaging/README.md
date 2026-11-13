@@ -24,6 +24,12 @@ Asynchronous messaging separates producers from processing time and location. Pe
 - Choose persistence and replication for explicit failure goals.
 - Make retry idempotent and poison-message recovery observable.
 
+### Coverage of chapter topics
+
+- Messaging primitives, persistence, publish/subscribe, and replication.
+- RabbitMQ example: messages, exchanges, queues, distribution, and concurrency.
+- Safety/performance and availability trade-offs; competing consumers, exactly-once scope, and poison messages.
+
 ## Proposed application
 
 - **Application / solution name:** `ReliableAsyncMessagingLab`.

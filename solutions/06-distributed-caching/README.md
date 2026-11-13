@@ -24,6 +24,12 @@ Caching keeps reusable results near consumers to reduce computation, database re
 - HTTP validators avoid transferring unchanged representations.
 - Design cache misses, stampedes, eviction, and cache loss.
 
+### Coverage of chapter topics
+
+- Application cache versus web cache and where cached copies are reused.
+- HTTP freshness and validation using Cache-Control, Expires, Last-Modified, and ETag.
+- Correctness concerns: stale values, invalidation, and cache behavior on change.
+
 ## Proposed application
 
 - **Application / solution name:** `DistributedCacheBehaviorLab`.
