@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="340" viewBox="0 0 1200 340" role="img" aria-labelledby="t d">
+  <title id="t">Chapter 12: Strong Consistency</title><desc id="d">Conceptual learning path for Strong Consistency</desc>
+  <rect width="1200" height="340" rx="28" fill="#101827"/>
+  <text x="56" y="58" fill="#8bd5ca" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="700">FOUNDATIONS OF SCALABLE SYSTEMS · CHAPTER 12</text>
+  <text x="56" y="112" fill="#f3f4f6" font-family="Segoe UI,Arial,sans-serif" font-size="30" font-weight="700">Strong Consistency</text>
+  <g font-family="Segoe UI,Arial,sans-serif" text-anchor="middle">
+    <rect x="56" y="176" width="310" height="104" rx="16" fill="#183b4e" stroke="#42d3c2" stroke-width="2"/>
+    <text x="211" y="218" fill="#baf7ed" font-size="15">DESIGN QUESTION</text><text x="211" y="250" fill="#ffffff" font-size="19">Compare a single-database transaction with a distributed transaction scenario; force participant failure and inspect recovery.</text>
+    <path d="M378 228h54m-12-12 12 12-12 12" fill="none" stroke="#f0b45a" stroke-width="4"/>
+    <rect x="450" y="176" width="310" height="104" rx="16" fill="#302b51" stroke="#a78bfa" stroke-width="2"/>
+    <text x="605" y="218" fill="#d8ccff" font-size="15">CONTROLLED WORKLOAD</text><text x="605" y="250" fill="#ffffff" font-size="19">Repeatable experiment</text>
+    <path d="M772 228h54m-12-12 12 12-12 12" fill="none" stroke="#f0b45a" stroke-width="4"/>
+    <rect x="844" y="176" width="300" height="104" rx="16" fill="#49341d" stroke="#f0b45a" stroke-width="2"/>
+    <text x="994" y="218" fill="#ffe0a6" font-size="15">EVIDENCE</text><text x="994" y="250" fill="#ffffff" font-size="19">Measure and compare</text>
+  </g>
+</svg>

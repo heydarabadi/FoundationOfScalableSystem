@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="380" viewBox="0 0 1240 380" role="img" aria-labelledby="title desc">
+<title id="title">Chapter 14: Scalable Event-Driven Processing</title>
+<desc id="desc">Kafka topic partitions feed a consumer group. Processed events update projections, and telemetry measures throughput and lag.</desc>
+<rect width="1240" height="380" rx="26" fill="#101827"/>
+<text x="52" y="52" fill="#8bd5ca" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="700">FOUNDATIONS OF SCALABLE SYSTEMS · CHAPTER 14</text>
+<text x="52" y="101" fill="#f3f4f6" font-family="Segoe UI,Arial,sans-serif" font-size="30" font-weight="700">Scalable Event-Driven Processing</text>
+<g font-family="Segoe UI,Arial,sans-serif" text-anchor="middle">
+<rect x="45" y="166" width="230" height="132" rx="15" fill="#183b4e" stroke="#42d3c2" stroke-width="2"/><text x="160" y="201" fill="#baf7ed" font-size="15">PRODUCER</text><text x="160" y="238" fill="#fff" font-size="19">Publish keyed</text><text x="160" y="265" fill="#fff" font-size="19">events</text>
+<path d="M285 231h39m-11-11 11 11-11 11" fill="none" stroke="#f0b45a" stroke-width="4"/>
+<rect x="337" y="166" width="250" height="132" rx="15" fill="#302b51" stroke="#a78bfa" stroke-width="2"/><text x="462" y="201" fill="#d8ccff" font-size="15">KAFKA TOPIC</text><text x="462" y="238" fill="#fff" font-size="19">Partitions set</text><text x="462" y="265" fill="#fff" font-size="19">parallelism</text>
+<path d="M597 231h39m-11-11 11 11-11 11" fill="none" stroke="#f0b45a" stroke-width="4"/>
+<rect x="649" y="166" width="250" height="132" rx="15" fill="#183b4e" stroke="#42d3c2" stroke-width="2"/><text x="774" y="201" fill="#baf7ed" font-size="15">CONSUMER GROUP</text><text x="774" y="238" fill="#fff" font-size="19">Scale workers</text><text x="774" y="265" fill="#fff" font-size="19">by backlog</text>
+<path d="M909 231h39m-11-11 11 11-11 11" fill="none" stroke="#f0b45a" stroke-width="4"/>
+<rect x="961" y="166" width="234" height="132" rx="15" fill="#49341d" stroke="#f0b45a" stroke-width="2"/><text x="1078" y="201" fill="#ffe0a6" font-size="15">PROJECTIONS</text><text x="1078" y="238" fill="#fff" font-size="19">Store results</text><text x="1078" y="265" fill="#fff" font-size="19">and observe</text>
+</g>
+<text x="52" y="344" fill="#aeb9c8" font-family="Segoe UI,Arial,sans-serif" font-size="16">Experiment: preserve ordering and delivery guarantees while changing partition and consumer counts.</text>
+</svg>

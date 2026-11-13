@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ScalableEventDrivenProcessing.Api/ScalableEventDrivenProcessing.Api.csproj" />
+    <Project Path="src/ScalableEventDrivenProcessing.BasketProcessor/ScalableEventDrivenProcessing.BasketProcessor.csproj" />
+    <Project Path="src/ScalableEventDrivenProcessing.Contracts/ScalableEventDrivenProcessing.Contracts.csproj" />
+    <Project Path="src/ScalableEventDrivenProcessing.InventoryProcessor/ScalableEventDrivenProcessing.InventoryProcessor.csproj" />
+  </Folder>
+</Solution>

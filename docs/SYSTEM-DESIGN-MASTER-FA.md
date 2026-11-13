@@ -4,11 +4,17 @@
 
 # راهنمای جامع طراحی سیستم تراکنش پرترافیک
 
-![نمای تصویری مسیر تراکنش‌ها، workerها و پایش در Kubernetes](assets/hpt-architecture-cover.png)
+![نمای تصویری مسیر تراکنش‌ها، workerها و پایش در Kubernetes](../solutions/14-scalable-event-driven-processing/docs/assets/hpt-architecture-cover.png)
 
 <p align="center"><em>تصویر جلد راهنما؛ نمودارهای دقیق جریان و تصمیم‌گیری در ادامهٔ سند آمده‌اند.</em></p>
 
 این سند یک مسیر یادگیری و تصمیم‌گیری است؛ برای رسیدن به «۱۰۰٬۰۰۰ TPS» نسخهٔ جادویی وجود ندارد. ظرفیت فقط وقتی واقعی است که workload، سخت‌افزار، SLO و نتایج آزمون روشن باشند. کلاستر فعلی kind برای یادگیری و smoke test است و نمایندهٔ محیط production نیست.
+
+## مسیر یادگیری: *Foundations of Scalable Systems*
+
+این سند ترتیب کتاب را روی نمونهٔ پردازش تراکنش پیاده می‌کند: فصل‌های ۱ تا ۴ مقیاس‌پذیری، رفتار سیستم توزیع‌شده و هم‌زمانی را پایه می‌گذارند؛ فصل‌های ۵ تا ۹ سرویس، cache، پیام‌رسانی، serverless و مرز microservice را بررسی می‌کنند؛ فصل‌های ۱۰ تا ۱۳ به مقیاس پایگاه‌داده و consistency می‌پردازند؛ فصل‌های ۱۴ و ۱۵ پردازش رویدادمحور و stream را پوشش می‌دهند؛ فصل ۱۶ این مسیر را به automation، observability، استقرار و دادهٔ تحلیلی وصل می‌کند. [نقشهٔ فصل‌به‌فصل](SCALABILITY-ROADMAP-FA.md) به خلاصهٔ فارسی و انگلیسی هر فصل و آزمایش پیشنهادی لینک می‌دهد.
+
+پیاده‌سازی فعلی Kafka و Kubernetes نمونهٔ اجرایی فصل ۱۴ است. پوشه‌های فصل‌های دیگر فعلاً راهنمای یادگیری و طرح آزمایش‌اند، نه ادعای پیاده‌سازی یا benchmark انجام‌شده. در سراسر سند، نتیجهٔ اندازه‌گیری‌شده را از هدف طراحی و گزینهٔ آینده جدا نگه می‌داریم.
 
 ## ۱. مسئله را دقیق تعریف کن
 
@@ -288,7 +294,7 @@ Deployment برای API و worker بدون state محلی؛ StatefulSet/PVC یا
 
 ### تخمین اولیه از اندازه‌گیری محلی این پروژه
 
-در kind تک‌نودی، یک اجرای کم‌بار با دو basket worker حدود ۷۵۰ فرمان/s برای هر worker داشت؛ اما در مرحلهٔ ۲۵k/s، offset commitشده طی ۱۰ ثانیه حدود ۱۵۹k جلو رفت، یعنی نزدیک ۴k فرمان/s برای هر یک از چهار worker همان run. این اختلاف بیش از پنج‌برابری نشان می‌دهد extrapolation به utilization و workload وابسته است. `100,000 / 4,000 ≈ 26` worker فقط برون‌یابی سادهٔ پرفشار است؛ بر اساس requests فعلی، حدود ۱۳ vCPU و ۱۳Gi برای workerها می‌خواهد، پیش از headroom و سایر سرویس‌ها. این sizing نهایی نیست. سقف manifestهای فعلی ۵۱۲ basket worker و ۲۵۶ API است و در سقف، فقط controller/broker/API/basket حدود ۳۴۵٫۵ vCPU و ۳۷۱Gi request می‌خواهند؛ سقف Inventory با workerهای checkout این envelope را بزرگ‌تر می‌کند. این سقف کنترل‌کننده را با ظرفیت nodeها/quota محدود کن؛ محاسبه و فرض‌ها در [runbook پرفورمنس ۱۰۰k](PERFORMANCE-100K-FA.md) آمده است. topic پرفورمنس ۵۱۲ partition دارد، پس ۲۶ consumer از سقف موازی‌سازی آن کمتر است؛ اما skew، CPU throttling و Redis ممکن است نرخ را تغییر دهند.
+در kind تک‌نودی، یک اجرای کم‌بار با دو basket worker حدود ۷۵۰ فرمان/s برای هر worker داشت؛ اما در مرحلهٔ ۲۵k/s، offset commitشده طی ۱۰ ثانیه حدود ۱۵۹k جلو رفت، یعنی نزدیک ۴k فرمان/s برای هر یک از چهار worker همان run. این اختلاف بیش از پنج‌برابری نشان می‌دهد extrapolation به utilization و workload وابسته است. `100,000 / 4,000 ≈ 26` worker فقط برون‌یابی سادهٔ پرفشار است؛ بر اساس requests فعلی، حدود ۱۳ vCPU و ۱۳Gi برای workerها می‌خواهد، پیش از headroom و سایر سرویس‌ها. این sizing نهایی نیست. سقف manifestهای فعلی ۵۱۲ basket worker و ۲۵۶ API است و در سقف، فقط controller/broker/API/basket حدود ۳۴۵٫۵ vCPU و ۳۷۱Gi request می‌خواهند؛ سقف Inventory با workerهای checkout این envelope را بزرگ‌تر می‌کند. این سقف کنترل‌کننده را با ظرفیت nodeها/quota محدود کن؛ محاسبه و فرض‌ها در [runbook پرفورمنس ۱۰۰k](../solutions/14-scalable-event-driven-processing/docs/PERFORMANCE-100K-FA.md) آمده است. topic پرفورمنس ۵۱۲ partition دارد، پس ۲۶ consumer از سقف موازی‌سازی آن کمتر است؛ اما skew، CPU throttling و Redis ممکن است نرخ را تغییر دهند.
 
 حداکثر batch size برابر ۵۰۰ است؛ بنابراین ۱۰۰k command/s می‌تواند از حدود ۲۰۰ HTTP request/s برسد. در kind، batch=500 و 10 request/s به حدود 5,015 command/s برای ۱۵ ثانیه رسید و consumer lag بعد از load به صفر برگشت؛ در 25k command/s، API صفر خطا داشت اما پس از run حدود 91k lag جمع شد و چهار worker به CPU بالاتر از HPA target رسیدند؛ حداکثر ۱۰ ثانیه بعد صف تخلیه شده بود. این مشاهده گلوگاه سقف چهار worker در همان kind را نشان می‌دهد، نه ظرفیت production. API acceptance، Kafka durability، Redis projection و checkout completion چهار نتیجهٔ جدا هستند و باید هرکدام با SLO خود benchmark شوند.
 

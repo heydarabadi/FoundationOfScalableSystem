@@ -1,0 +1,45 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: scalable-event-driven-processing-basket-processor
+  namespace: scalable-event-driven-processing
+spec:
+  scaleTargetRef:
+    name: scalable-event-driven-processing-basket-processor
+  pollingInterval: 5
+  cooldownPeriod: 60
+  minReplicaCount: 16
+  maxReplicaCount: 512
+  triggers:
+    - type: kafka
+      metadata:
+        bootstrapServers: scalable-event-driven-processing-kafka-kafka-bootstrap:9092
+        consumerGroup: basket-projector-v1
+        topic: basket.commands
+        # Initial lag target: ~4k messages, about one second at the kind rate (~4k/s/worker).
+        # Recalculate from target-cluster worker throughput and the allowed drain time.
+        lagThreshold: "4000"
+        offsetResetPolicy: earliest
+        allowIdleConsumers: "false"
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: scalable-event-driven-processing-inventory-processor
+  namespace: scalable-event-driven-processing
+spec:
+  scaleTargetRef:
+    name: scalable-event-driven-processing-inventory-processor
+  pollingInterval: 5
+  cooldownPeriod: 60
+  minReplicaCount: 2
+  maxReplicaCount: 128
+  triggers:
+    - type: kafka
+      metadata:
+        bootstrapServers: scalable-event-driven-processing-kafka-kafka-bootstrap:9092
+        consumerGroup: inventory-reservation-v1
+        topic: orders.submitted
+        lagThreshold: "500"
+        offsetResetPolicy: earliest
+        allowIdleConsumers: "false"

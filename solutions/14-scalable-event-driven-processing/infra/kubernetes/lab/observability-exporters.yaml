@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scalable-event-driven-processing-postgres-exporter
+  namespace: scalable-event-driven-processing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scalable-event-driven-processing-postgres-exporter
+  template:
+    metadata:
+      labels:
+        app: scalable-event-driven-processing-postgres-exporter
+    spec:
+      containers:
+        - name: exporter
+          image: quay.io/prometheuscommunity/postgres-exporter:v0.20.1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: DATA_SOURCE_URI
+              value: scalable-event-driven-processing-postgres:5432/hpt?sslmode=disable
+            - name: DATA_SOURCE_USER
+              value: hpt
+            - name: DATA_SOURCE_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: scalable-event-driven-processing-app-secrets
+                  key: POSTGRES_PASSWORD
+          ports:
+            - name: metrics
+              containerPort: 9187
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scalable-event-driven-processing-kafka-exporter
+  namespace: scalable-event-driven-processing
+spec:
+  selector:
+    strimzi.io/name: scalable-event-driven-processing-kafka-kafka-exporter
+  ports:
+    - name: metrics
+      port: 9404
+      targetPort: tcp-prometheus
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scalable-event-driven-processing-postgres-exporter
+  namespace: scalable-event-driven-processing
+spec:
+  selector:
+    app: scalable-event-driven-processing-postgres-exporter
+  ports:
+    - name: metrics
+      port: 9187
+      targetPort: metrics
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scalable-event-driven-processing-redis-exporter
+  namespace: scalable-event-driven-processing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scalable-event-driven-processing-redis-exporter
+  template:
+    metadata:
+      labels:
+        app: scalable-event-driven-processing-redis-exporter
+    spec:
+      containers:
+        - name: exporter
+          image: oliver006/redis_exporter:v1.93.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - --redis.addr=redis://scalable-event-driven-processing-redis:6379
+          ports:
+            - name: metrics
+              containerPort: 9121
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scalable-event-driven-processing-redis-exporter
+  namespace: scalable-event-driven-processing
+spec:
+  selector:
+    app: scalable-event-driven-processing-redis-exporter
+  ports:
+    - name: metrics
+      port: 9121
+      targetPort: metrics

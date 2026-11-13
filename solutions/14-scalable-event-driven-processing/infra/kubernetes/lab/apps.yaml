@@ -1,0 +1,260 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scalable-event-driven-processing-api
+  namespace: scalable-event-driven-processing
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: scalable-event-driven-processing-api
+  template:
+    metadata:
+      labels:
+        app: scalable-event-driven-processing-api
+    spec:
+      containers:
+        - name: api
+          image: scalable-event-driven-processing-api:dev
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: scalable-event-driven-processing-app-config
+            - secretRef:
+                name: scalable-event-driven-processing-app-secrets
+          env:
+            - name: ASPNETCORE_HTTP_PORTS
+              value: "8080"
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+  namespace: scalable-event-driven-processing
+  labels:
+    app: scalable-event-driven-processing-api
+spec:
+  selector:
+    app: scalable-event-driven-processing-api
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scalable-event-driven-processing-basket-processor
+  namespace: scalable-event-driven-processing
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: scalable-event-driven-processing-basket-processor
+  template:
+    metadata:
+      labels:
+        app: scalable-event-driven-processing-basket-processor
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: basket-processor
+          image: scalable-event-driven-processing-basket-processor:dev
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: metrics
+              containerPort: 9464
+          env:
+            - name: ASPNETCORE_HTTP_PORTS
+              value: "9464"
+          envFrom:
+            - configMapRef:
+                name: scalable-event-driven-processing-app-config
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: metrics
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: metrics
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: "2"
+              memory: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scalable-event-driven-processing-basket-processor
+  namespace: scalable-event-driven-processing
+spec:
+  selector:
+    app: scalable-event-driven-processing-basket-processor
+  ports:
+    - name: metrics
+      port: 9464
+      targetPort: metrics
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scalable-event-driven-processing-inventory-processor
+  namespace: scalable-event-driven-processing
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: scalable-event-driven-processing-inventory-processor
+  template:
+    metadata:
+      labels:
+        app: scalable-event-driven-processing-inventory-processor
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: inventory-processor
+          image: scalable-event-driven-processing-inventory-processor:dev
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: metrics
+              containerPort: 9464
+          env:
+            - name: ASPNETCORE_HTTP_PORTS
+              value: "9464"
+          envFrom:
+            - configMapRef:
+                name: scalable-event-driven-processing-app-config
+            - secretRef:
+                name: scalable-event-driven-processing-app-secrets
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: metrics
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: metrics
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: "2"
+              memory: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scalable-event-driven-processing-inventory-processor
+  namespace: scalable-event-driven-processing
+spec:
+  selector:
+    app: scalable-event-driven-processing-inventory-processor
+  ports:
+    - name: metrics
+      port: 9464
+      targetPort: metrics
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: scalable-event-driven-processing-api
+  namespace: scalable-event-driven-processing
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: scalable-event-driven-processing-api
+  minReplicas: 2
+  maxReplicas: 100
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 65
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: scalable-event-driven-processing-basket-processor
+  namespace: scalable-event-driven-processing
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: scalable-event-driven-processing-basket-processor
+  minReplicas: 2
+  maxReplicas: 4
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 65
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scalable-event-driven-processing-web
+  namespace: scalable-event-driven-processing
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: scalable-event-driven-processing-web
+  template:
+    metadata:
+      labels:
+        app: scalable-event-driven-processing-web
+    spec:
+      containers:
+        - name: web
+          image: scalable-event-driven-processing-web:dev
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scalable-event-driven-processing-web
+  namespace: scalable-event-driven-processing
+spec:
+  selector:
+    app: scalable-event-driven-processing-web
+  ports:
+    - port: 80
+      targetPort: 80

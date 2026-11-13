@@ -1,0 +1,15 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: scalable-event-driven-processing-api
+  namespace: scalable-event-driven-processing
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: scalable-event-driven-processing-api
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

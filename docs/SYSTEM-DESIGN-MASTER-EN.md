@@ -4,9 +4,15 @@
 
 # System Design Master Guide for a High-Throughput Transaction System
 
-![HPT transaction flow, workers, and Kubernetes observability](assets/hpt-architecture-cover.png)
+![HPT transaction flow, workers, and Kubernetes observability](../solutions/14-scalable-event-driven-processing/docs/assets/hpt-architecture-cover.png)
 
 This is a learning and decision guide, not a recipe that guarantees 100,000 TPS. Capacity is meaningful only when workload, hardware, SLOs, and measured results are known. The current kind cluster is for learning and smoke tests; it does not represent production.
+
+## Learning spine: *Foundations of Scalable Systems*
+
+This guide applies the book's progression to this transaction-processing example: Chapters 1–4 establish scalability, distributed-system behavior, and concurrency; Chapters 5–9 cover services, caching, messaging, serverless, and microservice boundaries; Chapters 10–13 examine database scaling and consistency; Chapters 14–15 cover event-driven and stream processing; Chapter 16 ties the work to automation, observability, deployment, and analytical data. The [chapter-by-chapter roadmap](SCALABILITY-ROADMAP-EN.md) links each topic to a bilingual summary and a proposed experiment.
+
+The existing Kafka/Kubernetes implementation is the worked example for Chapter 14. Other chapter folders are learning guides and proposed experiments, not claims of implemented or benchmarked solutions. Keep measured results, design targets, and future options distinct throughout this document.
 
 ## 1. Define the problem before choosing technology
 
@@ -280,17 +286,17 @@ Approximate input volume: `bytes/sec = TPS × average serialized bytes`; replica
 
 ### Local latency illustration
 
-![Recorded p95 and p99 latency percentiles for selected local runs](assets/local-kind-latency-percentiles.svg)
+![Recorded p95 and p99 latency percentiles for selected local runs](../solutions/14-scalable-event-driven-processing/docs/assets/local-kind-latency-percentiles.svg)
 
 The chart contains selected percentiles from short single-node kind runs. It is a local observation, not a production SLO or capacity guarantee. The histogram below illustrates a latency distribution and its tail only; its bar frequencies are not measured data.
 
-![Conceptual latency histogram showing p95 and p99 tails](assets/latency-histogram-concept.svg)
+![Conceptual latency histogram showing p95 and p99 tails](../solutions/14-scalable-event-driven-processing/docs/assets/latency-histogram-concept.svg)
 
-Build a measured histogram from raw samples or Prometheus buckets for each repeatable run. See the [performance runbook](PERFORMANCE-100K-EN.md) for measured scenarios and bucket guidance.
+Build a measured histogram from raw samples or Prometheus buckets for each repeatable run. See the [performance runbook](../solutions/14-scalable-event-driven-processing/docs/PERFORMANCE-100K-EN.md) for measured scenarios and bucket guidance.
 
 ### Initial estimate from this project's local measurements
 
-On single-node kind, a low-load run with two basket workers was about 750 commands/s per worker. At 25k/s, committed offsets advanced about 159k over 10 seconds, near 4k commands/s per each of the four workers in that run. This more-than-five-fold difference shows how utilization and workload affect extrapolation. `100,000 / 4,000 ≈ 26` workers is a rough high-load estimate, about 13 vCPU and 13Gi at current worker requests before headroom and other services. It is not final sizing. Current manifest maxima are 512 basket workers and 256 API replicas; controllers/brokers/API/basket at those ceilings request about 345.5 vCPU and 371Gi. Inventory workers raise that envelope. Limit controller ceilings to node capacity/quota. The assumptions are detailed in the [performance runbook](PERFORMANCE-100K-EN.md). The performance topic has 512 partitions, so 26 consumers fit below the parallelism cap; skew, CPU throttling, and Redis can change actual throughput.
+On single-node kind, a low-load run with two basket workers was about 750 commands/s per worker. At 25k/s, committed offsets advanced about 159k over 10 seconds, near 4k commands/s per each of the four workers in that run. This more-than-five-fold difference shows how utilization and workload affect extrapolation. `100,000 / 4,000 ≈ 26` workers is a rough high-load estimate, about 13 vCPU and 13Gi at current worker requests before headroom and other services. It is not final sizing. Current manifest maxima are 512 basket workers and 256 API replicas; controllers/brokers/API/basket at those ceilings request about 345.5 vCPU and 371Gi. Inventory workers raise that envelope. Limit controller ceilings to node capacity/quota. The assumptions are detailed in the [performance runbook](../solutions/14-scalable-event-driven-processing/docs/PERFORMANCE-100K-EN.md). The performance topic has 512 partitions, so 26 consumers fit below the parallelism cap; skew, CPU throttling, and Redis can change actual throughput.
 
 Maximum API batch size is 500, so 100k commands/s could arrive in about 200 HTTP requests/s. On kind, batch=500 at 10 requests/s reached about 5,015 commands/s for 15 seconds and lag returned to zero. At 25k commands/s, the API had no errors but accumulated about 91k lag; four workers reached CPU above the HPA target, and the queue drained within 10 seconds. This demonstrates the four-worker ceiling in that kind setup, not production capacity. API acceptance, Kafka durability, Redis projection, and checkout completion are separate outcomes and need separate SLOs.
 

@@ -1,0 +1,41 @@
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaTopic
+metadata:
+  name: basket-commands
+  namespace: scalable-event-driven-processing
+  labels:
+    strimzi.io/cluster: scalable-event-driven-processing-kafka
+spec:
+  topicName: basket.commands
+  partitions: 4
+  replicas: 4
+  config:
+    min.insync.replicas: 3
+---
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaTopic
+metadata:
+  name: orders-submitted
+  namespace: scalable-event-driven-processing
+  labels:
+    strimzi.io/cluster: scalable-event-driven-processing-kafka
+spec:
+  topicName: orders.submitted
+  partitions: 4
+  replicas: 4
+  config:
+    min.insync.replicas: 3
+---
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaTopic
+metadata:
+  name: inventory-results
+  namespace: scalable-event-driven-processing
+  labels:
+    strimzi.io/cluster: scalable-event-driven-processing-kafka
+spec:
+  topicName: orders.inventory-results
+  partitions: 4
+  replicas: 4
+  config:
+    min.insync.replicas: 3
