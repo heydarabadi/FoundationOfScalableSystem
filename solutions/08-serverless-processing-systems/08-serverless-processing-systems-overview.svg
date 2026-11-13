@@ -5,7 +5,7 @@
   <text x="56" y="112" fill="#f3f4f6" font-family="Segoe UI,Arial,sans-serif" font-size="30" font-weight="700">Serverless Processing Systems</text>
   <g font-family="Segoe UI,Arial,sans-serif" text-anchor="middle">
     <rect x="56" y="176" width="310" height="104" rx="16" fill="#183b4e" stroke="#42d3c2" stroke-width="2"/>
-    <text x="211" y="218" fill="#baf7ed" font-size="15">DESIGN QUESTION</text><text x="211" y="250" fill="#ffffff" font-size="19">Compare a queue-triggered function with an always-on worker for the same idempotent task and arrival pattern.</text>
+    <text x="211" y="204" fill="#baf7ed" font-size="15">DESIGN QUESTION</text><text x="211" y="238" fill="#ffffff" font-size="16"><tspan x="211" dy="0">Compare serverless and</tspan><tspan x="211" dy="18">workers on one bursty task.</tspan></text>
     <path d="M378 228h54m-12-12 12 12-12 12" fill="none" stroke="#f0b45a" stroke-width="4"/>
     <rect x="450" y="176" width="310" height="104" rx="16" fill="#302b51" stroke="#a78bfa" stroke-width="2"/>
     <text x="605" y="218" fill="#d8ccff" font-size="15">CONTROLLED WORKLOAD</text><text x="605" y="250" fill="#ffffff" font-size="19">Repeatable experiment</text>
