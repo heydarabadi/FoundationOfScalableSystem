@@ -41,6 +41,38 @@ DynamoDB سرویس مدیریت‌شدهٔ key-value/document است که بر 
 - partition/sort key، secondary index، batch/transaction، replication مدیریت‌شده، read قوی/نهایی، global table و رفتار hot-key/capacity در DynamoDB.
 - due diligence مقایسه‌ای: تضمین واقعی، workload، بازیابی و هزینه را آزمایش کن؛ نام قابلیت مشابه را معادل فرض نکن.
 
+## درس آموزشی: مقایسهٔ موتور واقعی
+
+### هدف‌های یادگیری و نقشهٔ مفهومی
+
+- از قابلیت محصول به semantics واقعی read/write/failure برسیم.
+- مدل داده و partition key را برای queryهای برنامه بسازیم.
+- durability، availability، replication و persistence را از هم جدا کنیم.
+
+`business invariant + access pattern → data model → routing/partitioning → consistency/durability → failure drill`
+
+### Redis
+
+Redis ساختارهای دادهٔ in-memory دارد و برای lookup سریع، cache و state کلیدمحور مناسب است. ابتدا تصمیم بگیر داده disposable است، از منبع دیگری rebuild می‌شود یا حقیقت پایدار است. RDB snapshot و AOF تغییرات logشده را ذخیره می‌کنند و durability/latency متفاوت دارند؛ replication برای HA است ولی ممکن است async باشد و با persistence یکی نیست. Cluster hash slotها را توزیع می‌کند؛ عملیات چندکلیدی ممکن است نیاز داشته باشد keyها هم‌slot باشند. برای payment/inventory، failover و از دست‌رفتن آخرین write را با نیاز دامنه مقایسه کن.
+
+### MongoDB
+
+مدل سند برای aggregateهایی است که معمولاً با هم خوانده یا تغییر می‌کنند. یک سند می‌تواند atomic باشد؛ embedding/denormalization را بر اساس access pattern انتخاب کن. Multi-document transaction وجود دارد اما هزینه دارد و جای schema مناسب را نمی‌گیرد. Replica set برای دسترس‌پذیری و انتخاب primary است؛ sharding نیازمند shard key با توزیع و routing مناسب است. Read/write concern را در آزمون و failure drill صریح کن.
+
+### DynamoDB
+
+دسترسی را با partition key و sort key مدل کن؛ queryهای اصلی باید از پیش معلوم باشند. key کم‌تنوع یا hot ممکن است بار را روی بخشی از ظرفیت متمرکز کند. Conditional update و transaction چند آیتمی برای workflow محدود ممکن است، اما هزینه و محدودیت سرویس را بررسی کن. سرویس مدیریت‌شده بخشی از ادارهٔ node را حذف می‌کند، نه مدل‌سازی access pattern را.
+
+### مقایسه و تمرین
+
+| عملیات | PostgreSQL | Redis | MongoDB | DynamoDB |
+| --- | --- | --- | --- | --- |
+| رزرو چند SKU | transaction مناسب | نیازمند پروتکل سازگاری جدا | transaction چند سند با هزینه | conditional items/transaction با محدودیت سرویس |
+| cache سبد | شدنی، معمولاً منبع اصلی نباشد | طبیعی و کم‌تأخیر | document read model | key-based projection |
+| گزارش joinمحور | SQL قوی | نامناسب برای query آزاد | aggregation با trade-off | access-pattern محدود |
+
+سه variant برای «افزودن کالا به سبد» بساز. هرکدام idempotency key، version/order، expiry، read-your-write و recovery را مشخص کند. با payload و ترکیب بار یکسان و قطع node، correctness، p99، durability و هزینه را مقایسه کن.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `DistributedDatabaseModelComparisonLab`.

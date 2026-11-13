@@ -36,6 +36,57 @@ web cache از HTTP و واسطه‌هایی مثل browser، proxy سازمان
 - تازگی و اعتبارسنجی HTTP با Cache-Control، Expires، Last-Modified و ETag.
 - نگرانی‌های صحت: دادهٔ کهنه، invalidation و رفتار cache پس از تغییر.
 
+## درس آموزشی
+
+### هدف‌های یادگیری و نقشهٔ مفهومی
+
+- تعیین کنیم چه داده‌ای cacheپذیر است و freshness مجازش چقدر است.
+- cache-aside، read-through، write-through و write-behind را از نظر خرابی مقایسه کنیم.
+- HTTP cache و validatorها را برای کم‌کردن انتقال داده به کار ببریم.
+
+`request → cache hit? → پاسخ؛ در miss → source of truth → cache با TTL/version`
+
+### از cache چه انتظاری داشته باشیم؟
+
+Cache مقدار را سریع‌تر و نزدیک‌تر نگه می‌دارد، نه اینکه خودبه‌خود source of truth شود. سودش به hit ratio و هزینهٔ محاسبه/خواندن اصلی وابسته است. برای هر کلید، اندازهٔ working set، نرخ تغییر، TTL و رفتار پس از miss را تعیین کن. eviction، restart یا failover ممکن است مقدار cache را حذف کند؛ درخواست باید بتواند به منبع اصلی برگردد. اگر load اصلی هنگام miss توان ندارد، cache failure هم می‌تواند outage بسازد.
+
+### الگوهای نوشتن
+
+- **Cache-aside:** برنامه miss را می‌بیند، source را می‌خواند و cache را پر می‌کند. ساده و قابل‌استفاده هنگام cache outage، اما stampede می‌تواند چندین read هم‌زمان بسازد.
+- **Read-through:** cache مسئول load از منبع است؛ caller ساده‌تر می‌شود ولی coupling و semantics cache بیشتر می‌شود.
+- **Write-through:** نوشتن تا به‌روزرسانی source/cache منتظر می‌ماند؛ freshness بهتر، latency و dual-write failure همچنان نیازمند طراحی است.
+- **Write-behind:** cache زود پاسخ می‌دهد و بعداً source را به‌روز می‌کند؛ throughput ممکن است بهتر شود اما خرابی قبل از flush داده را از دست می‌دهد.
+
+Invalidation را پس از تغییر داده انجام بده یا versionدار cache کن. Cache stampede را با single-flight/request coalescing، TTL پراکنده (jitter) و محدودکردن concurrency مهار کن؛ اما fallback هم باید rate limit داشته باشد.
+
+### HTTP و CDN
+
+Browser، proxy، reverse proxy و CDN می‌توانند GETهای قابل‌cache را نزدیک کاربر نگه دارند. `Cache-Control` مشخص می‌کند داده public/private است و چه مدتی fresh می‌ماند. `no-store` ذخیره نمی‌کند؛ `no-cache` یعنی پیش از استفاده دوباره اعتبارسنجی شود. `ETag` و `If-None-Match` امکان پاسخ `304 Not Modified` بدون ارسال body را می‌دهند. محتوای personalized یا حساس را بدون `private`/سیاست درست cache نکن؛ URL، Vary header و authorization بخشی از cache key و امنیت‌اند.
+
+```http
+Cache-Control: public, max-age=60, stale-while-revalidate=30
+ETag: "basket-view-v18"
+```
+
+عددها نمونه‌اند، برای دادهٔ واقعی با تغییرات و الزام privacy تطبیق بده.
+
+### مثال cache-aside و تصمیم
+
+```text
+GET basket:{id}:v{version}
+if miss: read DB → SET key value EX ttl+jitter
+on write: commit DB → invalidate old key or publish new version
+```
+
+| داده | تصمیم اولیه | دلیل/محدودیت |
+| --- | --- | --- |
+| تصویر و asset hashدار | CDN با cache طولانی | محتوا immutable و URL نسخه‌دار است |
+| صفحهٔ عمومی فهرست کالا | cache کوتاه + ETag | تغییر با کمی تأخیر پذیرفته می‌شود |
+| موجودی برای خرید | query authoritative/conditional write | cache می‌تواند oversell یا تصمیم قدیمی بسازد |
+| سبد موقت | Redis با TTL + persistence/rebuild contract | عمر و دوام باید با نیاز محصول روشن باشد |
+
+تمرین: endpoint read-heavy را بدون cache، cache-aside و invalidation versionدار اجرا کن. miss rate، DB QPS، p99، stale response و رفتار با Redis قطع‌شده را ثبت کن.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `DistributedCacheBehaviorLab`.

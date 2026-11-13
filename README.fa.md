@@ -15,6 +15,9 @@
 - [طراحی سیستم — فارسی](docs/SYSTEM-DESIGN-MASTER-FA.md)
 - [Implementable solution blueprints — English](docs/IMPLEMENTABLE-SOLUTION-BLUEPRINTS-EN.md)
 - [طرح‌های قابل پیاده‌سازی — فارسی](docs/IMPLEMENTABLE-SOLUTION-BLUEPRINTS-FA.md)
+- [راهنمای پیاده‌سازی خانواده‌های پایگاه‌داده](docs/DATABASE-FAMILIES-IMPLEMENTATION-GUIDE-FA.md)
+- [راهنمای concurrency، زبان‌ها و رویکردها](docs/CONCURRENCY-LANGUAGES-AND-APPROACHES-FA.md)
+- [راهنمای رویکردهای معماری](docs/ARCHITECTURAL-APPROACHES-PLAYBOOK-FA.md)
 
 ## راه‌حل‌ها
 

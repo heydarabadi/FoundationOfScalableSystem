@@ -40,6 +40,49 @@ retry می‌تواند پیام تکراری بسازد: broker شاید پیا
 - publisher confirm، queue/پیام پایدار، تأیید مصرف‌کننده و مصالحهٔ ایمنی با latency.
 - competing consumers، exactly-once محدود به‌کمک idempotency، محدودکردن redelivery، dead-letter، پایش و replay.
 
+## درس آموزشی
+
+### هدف‌های یادگیری و نقشهٔ مفهومی
+
+- queue و publish-subscribe را از نظر توزیع پیام و replay جدا کنیم.
+- durability، ack، retry، ordering و idempotency را در جریان کار بنویسیم.
+- صف را به‌عنوان buffer محدود برای جذب burst طراحی کنیم، نه انبار بی‌نهایت.
+
+`producer → broker durable → competing consumers → side effect → ack/commit`
+
+### Queue در برابر Pub/Sub
+
+در work queue چند consumer رقیب هر کدام بخشی از taskها را می‌گیرند؛ یک پیام معمولاً توسط یکی از اعضای آن queue انجام می‌شود. در pub/sub هر subscription مستقل پیام را می‌گیرد و می‌تواند state/سرعت خودش را داشته باشد. RabbitMQ با exchange و binding پیام را route می‌کند؛ direct برای routing key دقیق، topic برای الگوی چندقسمتی و fanout برای پخش همه‌جانبه. Kafka به‌جای حذف پیام پس از مصرف، log نگه می‌دارد و consumer offset خودش را دنبال می‌کند؛ پس چند consumer group می‌توانند تاریخچه را جدا بخوانند.
+
+### تحویل و دوام
+
+Publisher confirm می‌گوید broker پیام را طبق پیکربندی پذیرفته، نه اینکه عملیات کسب‌وکار کامل شده. Consumer ack پس از اثر پایدار باید صادر شود؛ ack زودهنگام ممکن است کار را گم کند، ack دیرهنگام duplicate می‌سازد. پس deduplication/idempotency لازم است. ترتیب در queue یا partition محدوده دارد؛ parallel consumerها می‌توانند پایان پردازش را جابه‌جا کنند. برای ترتیب per-aggregate از routing key یا partition key ثابت استفاده کن.
+
+Message TTL و queue length را محدود کن؛ retry با backoff و تعداد محدود انجام بده. پیام poison را به dead-letter/quarantine منتقل و alert کن؛ replay دستی باید idempotent و auditشده باشد. Consumer lag و age oldest message از تعداد پیام به‌تنهایی معنی‌دارترند. اگر ورودی پایداراً سریع‌تر از خروجی باشد، صف فقط زمان outage را عقب می‌اندازد؛ rate limit، backpressure یا رد کنترل‌شده لازم است.
+
+### مثال تحویل قابل‌تکرار
+
+```text
+receive(message)
+BEGIN DB transaction
+  if eventId already in ProcessedEvents: reuse prior result
+  else apply business effect and insert ProcessedEvents(eventId)
+COMMIT
+ack/commit input message
+```
+
+اگر process بعد از commit DB و پیش از ack بمیرد، پیام دوباره می‌آید؛ uniqueness روی `eventId` اثر دوم را می‌بندد. این الگو اثر دقیقاً یک‌بار را در مرز دیتابیس برنامه می‌سازد، نه یک تضمین جادویی از broker.
+
+### انتخاب و تمرین
+
+| گزینه | مناسب است | چه باید بسنجی |
+| --- | --- | --- |
+| RabbitMQ queue | task routing، ack و تحویل به یک worker مهم است | confirm/ack، queue durability، DLQ و رهبر queue |
+| Kafka | replay، retention و چند consumer group لازم است | partitioning، replication، offset، lag و storage |
+| Managed queue | می‌خواهی broker را خودت اداره نکنی | visibility/lease، ordering، retry و هزینهٔ provider |
+
+تمرین: یک پیام را در سه نقطهٔ قبل از اثر، پس از commit، و پیش از ack متوقف کن؛ ثابت کن هیچ سفارش دوباره رزرو نمی‌شود و هیچ پیام دائمی گم نشده است. سپس ورودی را بیشتر از مصرف‌کننده کن و backpressure را مشاهده کن.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `ReliableAsyncMessagingLab`.

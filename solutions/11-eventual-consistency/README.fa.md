@@ -39,6 +39,43 @@ miss شدن update، توقف node، خرابی دیسک/شبکه یا bug با�
 - read repair فعال و anti-entropy غیرفعال با Merkle tree.
 - تعارض write همزمان، محدودیت last-writer-wins، version/version vector، sibling، merge برنامه و همگرایی CRDT.
 
+## درس آموزشی
+
+### هدف‌های یادگیری و نقشهٔ مفهومی
+
+- inconsistency window و اثر آن را در UI و business workflow توضیح دهیم.
+- consistency را متناسب با عملیات تنظیم و R/W/N را حساب کنیم.
+- repair و conflict resolution را با هزینه و محدودیتشان طراحی کنیم.
+
+`write → replica propagation → موقتاً چند نسخه → quorum/read policy → repair/convergence`
+
+### اثر کاربر و RYOW
+
+Replication به node دیگر دوام یا نزدیکی جغرافیایی می‌دهد، ولی انتقال فوری نیست. در این window، کاربر ممکن است مقدار قبلی را ببیند. Read-your-own-writes (RYOW) تضمین می‌کند همان کاربر بعد از نوشتن خودش مقدار جدید را بخواند؛ می‌توان read را موقتاً به leader فرستاد یا version token نوشتن را حفظ و replicaای را انتخاب کرد که آن version را دارد. RYOW به معنی تازگی برای همهٔ کاربران نیست.
+
+### R/W/N و quorum
+
+با N replica، W تعداد ack نوشتن و R تعداد پاسخ خواندن است. بزرگ‌ترکردن W معمولاً هزینه/latency write و مقاومت در برابر خرابی هم‌زمان را تغییر می‌دهد؛ R بزرگ‌تر read را پرهزینه‌تر و احتمال دیدن نسخهٔ تازه‌تر را زیاد می‌کند. شرط `R + W > N` در مدل quorum ساده overlap می‌دهد، اما به‌ترتیب نسخه، quorum membership و semantics واقعی موتور وابسته است؛ آن را تضمین عمومی برای هر دیتابیس ندان. Sloppy quorum ممکن است موقع خرابی روی node جایگزین بنویسد، سپس hinted handoff آن را برگرداند؛ این کار availability را بالا می‌برد ولی read کهنه/تعارض ممکن است.
+
+### Convergence و تعارض
+
+Read repair هنگام مشاهدهٔ replicaهای متفاوت ممکن است نسخهٔ کهنه را اصلاح کند. Anti-entropy دوره‌ای hash/Merkle tree را مقایسه می‌کند تا فقط بخش‌های متفاوت sync شوند. هر دو شبکه، CPU و disk مصرف می‌کنند. Last-write-wins ساده است اما clock skew می‌تواند update منطقی تازه‌تر را حذف کند. Version vector رابطهٔ causal را بهتر نشان می‌دهد ولی چند نسخهٔ concurrent را به application می‌دهد. CRDT فقط برای operation/data typeهایی مناسب است که merge آن‌ها با قواعد مشخص همیشه convergent باشد؛ هر فیلد دیتابیس را CRDT نکن.
+
+### مثال UX
+
+پس از تغییر سبد، API نسخهٔ `basketVersion=19` برمی‌گرداند. درخواست read بعدی همان نسخه را می‌فرستد. اگر replica فقط version 18 را دارد، سیستم می‌تواند از leader بخواند یا موقتاً انتظار دهد؛ نباید silently مقدار قدیمی را به کاربر نشان دهد اگر قرارداد RYOW دارد. برای dashboard عمومی شاید 1–2 ثانیه lag پذیرفتنی باشد.
+
+### تصمیم و تمرین
+
+| نوع داده/عملیات | consistency شروع | سنجه/ریسک |
+| --- | --- | --- |
+| گزارش عمومی | eventual | projection lag و age |
+| سبد کاربر | RYOW | routing fallback و session version |
+| موجودی برای commit | transaction/conditional write authoritative | oversell و contention |
+| feed چندregion | tunable/quorum یا CRDT مناسب دامنه | conflict، network و repair cost |
+
+تمرین: replica را با delay مصنوعی عقب بینداز، write انجام بده و read را از replica/leader مقایسه کن. رفتار UI را برای stale، unavailable و conflict تعریف و R/W/N را با شکست یک node بررسی کن.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `EventualConsistencyRecoveryLab`.

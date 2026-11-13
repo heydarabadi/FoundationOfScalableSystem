@@ -39,6 +39,43 @@ consensus بین replicaها ترتیب یکسان update می‌سازد. Raft 
 - safety/liveness در consensus، log ماشین حالت تکثیرشده، term/quorum/election در Raft و جایگاه Paxos.
 - transaction تک‌پارتیشنی/چندپارتیشنی VoltDB و split replication، Paxos، 2PC و commit-wait در Spanner.
 
+## درس آموزشی
+
+### هدف‌های یادگیری و نقشهٔ مفهومی
+
+- ACID، serializability، linearizability و replica consistency را تفکیک کنیم.
+- 2PC را در مسیر موفق و خرابی coordinator دنبال کنیم.
+- Raft و quorum را در حد معماری و failure mode توضیح دهیم.
+
+`invariant → transaction isolation → replication protocol → commit/visibility → failure recovery`
+
+### چه تضمینی می‌خواهیم؟
+
+ACID transaction مجموعه تغییرها را اتمی، مطابق constraint کسب‌وکار، ایزوله از transactionهای هم‌زمان و پس از commit durable می‌کند. **Serializability** می‌گوید نتیجهٔ اجرای هم‌زمان مثل اجرای ترتیبی برخی transactionها باشد؛ **linearizability** برای عملیات یک شیء ترتیب واقعی زمان را نیز رعایت می‌کند. این دو مترادف نیستند. دیتابیس ممکن است تراکنش ACID در primary داشته باشد اما read از replica عقب‌مانده بخواند؛ transaction consistency با replica consistency یکی نیست.
+
+### 2PC و خطر انتظار
+
+در Two-phase commit، coordinator از participantها prepare می‌خواهد؛ participant منابع/log را آماده می‌کند و رأی می‌دهد. سپس coordinator تصمیم commit/abort را اعلام و ثبت می‌کند. اگر coordinator بعد از prepare از دسترس خارج شود، participant نمی‌تواند همیشه با اطمینان تصمیم را حدس بزند و ممکن است قفل نگه دارد. 2PC atomicity را هماهنگ می‌کند اما availability در failure و tail latency را تحت تأثیر می‌گذارد. Retry پاسخ نامعلوم، transaction را خودکار امن نمی‌کند.
+
+### Consensus و Raft
+
+Leader ورودی‌ها را در log مرتب می‌کند؛ followerها کپی می‌گیرند و پس از ثبت روی اکثریت، entry commit است. Heartbeat و election leader تازه را انتخاب می‌کنند، و term/log freshness از رأی به log عقب‌مانده جلوگیری می‌کند. با partition شبکه، side دارای quorum می‌تواند جلو برود و طرف بدون اکثریت باید نوشتن را متوقف کند تا split-brain رخ ندهد. quorum برای دسترسی availability هزینه دارد و write ممکن است round-trip اضافی بخواهد. Consensus ترتیب مشترک/replica state می‌سازد؛ خودش transaction منطقی application را طراحی نمی‌کند.
+
+### مثال invariant چندردیفی
+
+انتقال ۱۰ واحد از حساب A به B باید هر دو تغییر را با هم commit یا abort کند؛ جدا کردن دو write و ارسال یک event بدون طراحی saga می‌تواند پول را یک‌طرفه کم کند. اگر state در یک DB است، transaction محلی ساده‌تر است. اگر دو سرویس/DB مالک حساب‌ها هستند، باید contract توزیع‌شده، idempotency و compensation یا consensus transaction را آگاهانه انتخاب کرد.
+
+### تصمیم و تمرین
+
+| انتخاب | تضمین | هزینه/کاربرد |
+| --- | --- | --- |
+| Transaction یک DB | invariant چندردیفی محلی | simplest correctness baseline |
+| Leader + synchronous quorum | read/write تازه‌تر تا quorum | latency و توقف بدون quorum |
+| 2PC | atomic commit بین participants | coordinator state/locking/failure handling |
+| Saga | workflow eventual با compensation | intermediate states و business reversal |
+
+تمرین: 2PC trace را در participant failure، coordinator failure قبل prepare و بعد prepare رسم کن. سپس Raft cluster را با 3 node تصور کن: کدام nodeها می‌توانند commit را تأیید کنند و رفتار client سمت minority چیست؟
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `StrongConsistencyTransactionLab`.

@@ -40,6 +40,48 @@ API gateway یک نمای ثابت برای مشتری فراهم می‌کند 
 - اصول سرویس: دامنهٔ منسجم، مشاهده‌پذیری، پنهان‌سازی جزئیات، جداسازی خرابی، استقرار مستقل و خودکارسازی.
 - cascading failure، long-tail latency، timeout، fail-fast/throttling، retry امن/backoff، circuit breaker، fallback و bulkhead.
 
+## درس آموزشی
+
+### هدف‌های یادگیری و نقشهٔ مفهومی
+
+- microservice را با مرز دامنه و مالکیت مستقل تعریف کنیم، نه اندازهٔ کد.
+- distributed workflow را میان orchestration و choreography انتخاب کنیم.
+- شکست شبکه، دادهٔ تکراری و وابستگی آبشاری را در هر تماس حساب کنیم.
+
+`قابلیت کسب‌وکار → مرز داده/API → مالکیت تیم → تماس sync یا event → مشاهده‌پذیری/تاب‌آوری`
+
+### از monolith به سرویس
+
+Monolith ماژولار می‌تواند deployment ساده و transaction محلی داشته باشد؛ لازم نیست هر برنامه از روز اول microservice شود. microservice وقتی کمک می‌کند که بخشی مالکیت، نرخ تغییر، بار یا نیاز عملیاتی متفاوت داشته باشد و تیم بتواند مستقل deploy و اداره‌اش کند. مرز را از bounded context و invariant دامنه استخراج کن. تقسیم بیش از حد باعث chatty call می‌شود: latency جمع می‌شود و هر hop failure جدید می‌سازد. گاهی یک modular monolith یا ادغام دو سرویس راه‌حل بهتر است.
+
+هر سرویس باید مالکیت دادهٔ خود را داشته باشد؛ دیتابیس مشترک با schemaهای مشترک مرز سرویس را ظاهری می‌کند. تکثیر read model دسترسی محلی می‌دهد ولی باید به‌روز شود و lag آشکار باشد. برای کار sync، timeout کوتاه، retry محدود و circuit breaker بگذار؛ dependency failure نباید thread، connection و صف را پر کند. Bulkhead ظرفیت هر وابستگی/tenant را جدا می‌کند.
+
+### Saga و API Gateway
+
+Workflow چندسرویسی را نمی‌توان بی‌هزینه به یک دیتابیس transaction تبدیل کرد. Saga مراحل محلی و جبران (compensation) را تعریف می‌کند. Orchestration یک coordinator وضعیت مرحله‌ها را نگه می‌دارد و trace ساده‌تر می‌دهد؛ choreography سرویس‌ها را با event جدا می‌کند ولی فهم کل جریان و loopهای event سخت‌تر است. compensation دقیقاً rollback نیست: مثلاً refund یک اثر جدید است.
+
+API Gateway ورودی client را ثابت می‌کند و می‌تواند routing، auth، rate limit و aggregation انجام دهد. منطق دامنهٔ همهٔ سرویس‌ها را در gateway جمع نکن؛ gateway نباید تبدیل به monolith جدید شود. BFF وقتی مفید است که web/mobile واقعاً نیازهای متفاوت دارند.
+
+### مثال Saga رزرو سفارش
+
+```text
+Order: Pending → Inventory: Reserved → Payment: Authorized → Order: Confirmed
+                                ↘ payment fails → Inventory: Release → Order: Rejected
+```
+
+هر مرحله idempotency key و state انتقال دارد. worker retry می‌کند؛ timeout نامعلوم را با query وضعیت حل می‌کند؛ timeout مساوی شکست قطعی نیست. timeout جبران هم لازم است تا سفارش نیمه‌تمام برای همیشه نماند.
+
+### انتخاب و تمرین
+
+| رویکرد | مناسب برای | هزینه |
+| --- | --- | --- |
+| Modular monolith | تیم کوچک، transaction و تغییر مشترک | deploy/scale مستقل محدود است |
+| Sync services | پاسخ فوری و coupling رفتاری پذیرفته است | latency و failure chain |
+| Orchestrated saga | workflow طولانی با وضعیت قابل‌پیگیری | coordinator و state machine |
+| Event choreography | subscriberهای مستقل و نیاز به fan-out | trace و ترتیب end-to-end دشوارتر |
+
+تمرین: سفارش را به سه سرویس تقسیم نکن تا اول SLO و ownership هرکدام را بنویسی؛ سپس یک مرحله را عمداً timeout کن و اثبات کن retry/compensation سفارش دوگانه نمی‌سازد. trace id را از gateway تا همهٔ eventها حفظ کن.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `ServiceBoundaryResilienceLab`.

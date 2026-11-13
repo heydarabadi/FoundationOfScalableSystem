@@ -19,6 +19,8 @@
 
 برای مقایسهٔ چند معماری کامل برای مسئلهٔ سبد و سفارش، از [طرح‌های قابل پیاده‌سازی فارسی](IMPLEMENTABLE-SOLUTION-BLUEPRINTS-FA.md) یا [نسخهٔ انگلیسی](IMPLEMENTABLE-SOLUTION-BLUEPRINTS-EN.md) شروع کن. این‌ها الگوهای طراحی‌اند؛ فقط راه‌حل فصل ۱۴ در حال حاضر پیاده‌سازی اجرایی دارد.
 
+برای مطالعهٔ عمیق‌تر خانواده‌های داده، [راهنمای پیاده‌سازی پایگاه‌داده‌ها](DATABASE-FAMILIES-IMPLEMENTATION-GUIDE-FA.md) را بخوان؛ برای مقایسهٔ concurrency و زبان‌ها، [راهنمای زبان‌ها و مدل‌های هم‌روندی](CONCURRENCY-LANGUAGES-AND-APPROACHES-FA.md) را ببین. [راهنمای رویکردهای معماری](ARCHITECTURAL-APPROACHES-PLAYBOOK-FA.md) هم monolith، sync API، queue، Kafka، outbox، CQRS، Event Sourcing، Saga، stream processing، cache و serverless را کنار هم مقایسه می‌کند. این راهنماها خانواده‌های relational، key-value، document، wide-column، distributed SQL، graph، search و analytical storage را با workload و محدودیت بررسی می‌کنند و برای .NET، Go، Rust، JVM/Scala، Elixir و Node.js مسیر benchmark تعریف می‌کنند.
+
 برای هر فصل README دوزبانه و یک تصویر مفهومی SVG اختصاصی وجود دارد. فصل‌هایی که هنوز کد اجرایی ندارند صریحاً فقط راهنما و طرح هستند؛ نام پروژه و namespace آن‌ها تا زمان پیاده‌سازی پیشنهادی است.
 
 | فصل | راهنما |

@@ -77,6 +77,34 @@ API بدون state را روی بستر کانتینری مدیریت‌شده �
 ۵. بازیابی، کار تکراری یا replayشده، مفیدبودن هشدار، نگهداری/حذف داده و هزینه را زیر بار نماینده بررسی کن.
 ۶. نتیجهٔ اندازه‌گیری‌شده و موارد تأییدنشده را ثبت و با تغییر شرایط، طراحی را بازبینی کن.
 
+## درس آموزشی
+
+### هدف‌های یادگیری و نقشهٔ مفهومی
+
+- build، آزمون، انتشار، telemetry و recovery را به چرخهٔ عملیاتی وصل کنیم.
+- container/orchestrator و data lake را برای نیاز workload انتخاب کنیم.
+- فرض معماری را با SLO و شواهد مرتب بازنگری کنیم.
+
+`commit → build/test → deploy/rollback → telemetry → alert/diagnose → improve`
+
+### Delivery و مالکیت عملیات
+
+Pipeline باید build تکرارپذیر، validation، image/config versioning، deployment مرحله‌ای، health check و rollback داشته باشد. DevOps مسئولیت توسعه و اداره را به هم نزدیک می‌کند؛ runbook، on-call و بازبینی رخداد مکمل automation هستند. هدف تغییر پرتکرار با کیفیت است، نه deploy بیشتر به هر قیمت. برای migration دیتابیس، سازگاری نسخهٔ قدیم و جدید و مسیر rollback را هم تعریف کن.
+
+### Observability
+
+Metrics روند و saturation، log جزئیات رویداد و trace مسیر درخواست بین سرویس‌ها را نشان می‌دهد. Instrument کردن application و dependency مهم است؛ dashboard باید latency/error/throughput و منابع را به SLO وصل کند. Alert باید اقدام‌پذیر باشد، نه هر spike کوتاه. شناسه‌های پرتعداد مثل request id را در log/trace نگه دار نه label متریک، چون cardinality می‌تواند هزینه و حافظه را منفجر کند.
+
+### Platform و data lake
+
+VM مرز سیستم‌عامل جدا دارد و منابع بیشتری مصرف می‌کند؛ container کد و وابستگی را بسته‌بندی و روی kernel میزبان اجرا می‌کند. Kubernetes محل اجرا، rollout و scale را هماهنگ می‌کند؛ اما resource request/limit، probe، storage، network policy و upgrade را جادویی حل نمی‌کند. Infrastructure as Code محیط را بازتولیدپذیر می‌کند، در حالی که secret و stateful data نیازمند مدیریت جدا هستند.
+
+Data lake تاریخچهٔ چندقالبی و کم‌مصرف را روی object storage نگه می‌دارد. Catalog، partition، schema version، lineage، access control، lifecycle و حذف حریم خصوصی بخش طراحی‌اند. این مخزن معمولاً latency و transaction پایگاه عملیاتی را ندارد؛ analytics را از OLTP جدا و lag داده را به مصرف‌کننده اعلام کن.
+
+### تمرین پایان فصل
+
+یک سرویس آزمایشی را از commit تا deploy/rollback خودکار کن؛ synthetic traffic ثابت بساز؛ metrics/log/trace و alert روی SLO اضافه کن؛ failure و restore drill اجرا کن. دادهٔ قدیمی مصنوعی را به object storage export و از catalog query کن. محیط، نسخه، workload و نتیجهٔ خام را برای هر اجرا ذخیره کن.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `ScalabilityEvidenceKit`.

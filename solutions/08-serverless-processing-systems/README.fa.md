@@ -37,6 +37,40 @@ Google App Engine Standard و AWS Lambda دو مدل متفاوت را نشان 
 - Lambda: handler ورودی event/context، چرخهٔ cold/warm، مقداردهی وابستگی، concurrency رزروشده/آماده، رابطهٔ حافظه و توان پردازش، throttling و burst.
 - مطالعهٔ پارامتری: انتخاب بازه، اجرای آزمون کنترل‌شده و ارزیابی مشترک throughput و هزینه، به‌جای فرض بهینه بودن مقدار پیش‌فرض.
 
+## درس آموزشی
+
+### هدف‌های یادگیری و نقشهٔ مفهومی
+
+- serverless را به‌عنوان مدل اجرا/صورتحساب بفهمیم، نه نبودن server.
+- cold/warm start، concurrency و محدودیت پایین‌دستی را در طرح ظرفیت بگنجانیم.
+- تنظیمات را با مطالعهٔ پارامتری و هزینهٔ کار موفق انتخاب کنیم.
+
+`event → managed platform → scale/concurrency → function → external state/services`
+
+### مدل اجرا
+
+در function-as-a-service، ارائه‌دهنده محیط اجرا را ایجاد و invocation را براساس HTTP یا event انجام می‌دهد؛ گاهی محیط گرم برای درخواست‌های بعدی باقی می‌ماند. cold start شامل فراهم‌کردن runtime، بارگذاری کد و initialization است و ممکن است tail latency را بالا ببرد. provisioned/minimum warm capacity می‌تواند startup را کم کند اما هزینهٔ idle دارد. state پایدار را در دیتابیس/object store نگه دار؛ حافظه یا دیسک موقت یک invocation را durable فرض نکن.
+
+Autoscaling پلتفرم را با نیاز پایین‌دست محدود کن. صدها function هم‌زمان اگر هر کدام DB connection بگیرند ممکن است دیتابیس را از پا بیندازند. reserved concurrency، semaphore/bulkhead، queue و batch size ابزار کنترل‌اند. timeout function باید با visibility timeout، retry و deadline درخواست جور باشد تا دو اجرای هم‌پوشان اثر تکراری نسازند. function هم idempotent باشد.
+
+### اقتصاد و مطالعهٔ پارامتری
+
+هزینه فقط duration نیست؛ request count، memory/CPU allocation، provisioned capacity، network, logging, retries و datastore هم اثر دارند. حافظهٔ بیشتر ممکن است زمان را کم و هزینهٔ هر invocation را پایین آورد یا بی‌فایده هزینه را بالا ببرد. چند مقدار معنادار برای memory, concurrency, batch و warm capacity انتخاب کن؛ کد و workload را ثابت نگه دار؛ گرم/سرد و burst را چند بار اجرا کن. نقطه‌ای را انتخاب کن که SLO و هزینه را همزمان برآورده کند؛ بیشترین throughput الزاماً انتخاب بهینه نیست.
+
+### سه شکل معماری
+
+1. **HTTP function:** کار کوتاه و متناوب؛ gateway → function → managed store. سردشدن، timeout و connection reuse را اندازه بگیر.
+2. **Queue-triggered function:** API/outbox → queue → function batch. backlog را جذب می‌کند؛ idempotency، DLQ و visibility/lease لازم است.
+3. **Worker دائمی:** Kafka/queue → Deployment یا container service با KEDA/HPA → DB. برای بار پیوسته یا کنترل runtime مناسب؛ عملیات platform بر عهدهٔ تیم می‌ماند.
+
+### تمرین و دام‌ها
+
+یک کار idempotent مثل تولید thumbnail یا ارسال اعلان را در function HTTP، function صف‌محور و worker دائمی اجرا کن. cold/warm p95، max backlog age، error، throttle، CPU/memory و cost per completed item را بسنج. پایین‌دست را عمداً محدود کن.
+
+- serverless نه latency ثابت می‌دهد و نه ظرفیت نامحدود.
+- صف و function می‌توانند flood به دیتابیس ایجاد کنند؛ concurrency سقف‌دار لازم است.
+- قیمت و سهمیهٔ provider دائماً عوض می‌شود؛ اعداد کتاب ۲۰۲۲ را امروز hard-code نکن.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `ServerlessThroughputCostLab`.

@@ -36,6 +36,46 @@
 - cache و توزیع پایگاه‌داده، از جمله rebalancing هنگام تغییر گره‌ها.
 - چندلایه‌سازی پردازش، پاسخ‌گویی و اثر انتخاب سخت‌افزار و سامانه.
 
+## درس آموزشی
+
+### هدف‌های یادگیری و نقشهٔ مفهومی
+
+- مسیر درخواست را از client تا سرویس و داده رسم کنیم؛ scale-up را از scale-out جدا کنیم.
+- جایگاه cache، read replica، صف و پایگاه‌دادهٔ توزیع‌شده را بر اساس bottleneck انتخاب کنیم.
+
+`Client → Load Balancer → API replicas → cache/queue → data tier`
+
+### توضیح مفاهیم
+
+معماری پایه معمولاً client، سرویس برنامه و دیتابیس دارد. monolith در شروع ساده است: منطق و استقرار در یک مرز قرار دارد. وقتی پردازش برنامه اشباع شد، می‌توان ماشین بزرگ‌تر گرفت (scale-up) یا چند replica پشت load balancer قرار داد (scale-out). برای اینکه هر درخواست به هر replica برود، session نباید فقط در حافظهٔ یکی از آن‌ها باشد؛ state را به store مشترک منتقل کن یا برای stateless بودن طراحی کن.
+
+تکثیر API معمولاً از تکثیر دیتابیس ساده‌تر است. read replica می‌تواند خواندن‌هایی را که lag را تحمل می‌کنند از primary بردارد، اما writeها همچنان به primary می‌روند. cache دادهٔ پرتکرار را سریع می‌کند، اما invalidation و stale بودن بخشی از قرارداد می‌شود. cache را برای جبران query یا index ضعیف بدون اندازه‌گیری اضافه نکن.
+
+Queue مسیر پذیرش را از انجام کار جدا می‌کند. API پس از ثبت بادوام پیام پاسخ می‌دهد و worker بعداً پردازش می‌کند؛ burst هموار می‌شود، ولی «پذیرفته شد» به معنی «تکمیل شد» نیست. صف پر، consumer کند، duplicate و poison message نیازمند سیاست روشن‌اند. سرویس‌های مستقل یا BFF وقتی ارزش دارند که نیازهای مقیاس، مالکیت یا client واقعاً جدا باشند؛ هر مرز تازه، شبکه و عملیات تازه می‌آورد.
+
+### مثال: تغییر مقدار سبد
+
+در نسخهٔ synchronous، API مستقیماً PostgreSQL را به‌روزرسانی می‌کند؛ قرارداد ساده و سازگاری قوی‌تر است. در نسخهٔ async، API فرمان را به Kafka می‌فرستد و worker projection را به‌روز می‌کند؛ پذیرش سریع‌تر و جذب burst بهتر است، اما خواندن فوری شاید مقدار قبلی را نشان دهد. هر دو باید همان idempotency و invariant را رعایت کنند.
+
+```text
+request → API → (synchronous DB write | durable command queue)
+                       ↓                 ↓
+                  response         worker → projection/database
+```
+
+### تصمیم معماری و پرسش‌ها
+
+| الگو | مناسب است وقتی | محدودیت |
+| --- | --- | --- |
+| Monolith + relational DB | دامنه کوچک و تراکنش مهم است | ممکن است writer یا connection pool به سقف برسد |
+| Stateless API replicas | بار درخواست قابل‌تقسیم است | دیتابیس یا وابستگی مشترک همچنان bottleneck است |
+| Cache/read replica | بار read غالب و تازگی قابل‌تعریف است | برای تصمیم مالی با stale data مناسب نیست |
+| Queue + worker | کار پس‌زمینه یا burst دارید | پاسخ نهایی async و مشاهدهٔ وضعیت لازم است |
+
+- چند replica با session محلی، load balancing آزاد نمی‌دهد.
+- «سرویس بیشتر» را خودکار معادل scalability ندان.
+- کدام عملیات باید synchronous باشد و کدام می‌تواند eventual باشد؟ اگر صف سریع‌تر پر شود از مصرف‌کننده، backpressure کجا اعمال می‌شود؟
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `DistributedArchitectureTradeoffLab`.

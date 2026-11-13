@@ -38,6 +38,51 @@ Load balancer می‌تواند در Layer 4 با اتصال شبکه و NAT م�
 - application server، تکثیر افقی، load balancer و سیاست توزیع.
 - پایش سلامت، elasticity و هزینهٔ throughput/failover در session affinity.
 
+## درس آموزشی
+
+### هدف‌های یادگیری و نقشهٔ مفهومی
+
+- یک قرارداد HTTP کم‌ابهام طراحی کنیم و از chatty API دوری کنیم.
+- اثر thread، task queue و connection pool را روی latency و throughput بفهمیم.
+- stateful/stateless، load balancer، health check و elasticity را از هم جدا کنیم.
+
+`Client → Load Balancer → HTTP API → bounded work/connection pools → database`
+
+### قرارداد سرویس
+
+API مرز برنامه با مصرف‌کننده است. برای هر resource مشخص کن شناسه چیست، چه عملیات‌هایی مجازند، payload و پاسخ چه schemaای دارند، خطاهای قابل‌پیش‌بینی چه کد و معنایی دارند، و تکرار درخواست چه اثری می‌گذارد. CRUD رایج است، اما endpoint باید رفتار دامنه را منتقل کند؛ برای نمونه `POST /orders` فرمان ثبت سفارش است، نه صرفاً درج یک ردیف. OpenAPI قرارداد را برای تولیدکننده و مصرف‌کننده قابل‌بررسی می‌کند. chatty design چند round-trip برای یک عمل تجاری دارد و هزینهٔ شبکه/صف را زیاد می‌کند؛ endpointهای مناسب، batch محدود یا پاسخ شامل resource لازم را طراحی کن. فشرده‌سازی را برای payload بزرگ و شبکهٔ bottleneck با CPU cost مقایسه کن.
+
+### Application server و ظرفیت
+
+سرور HTTP درخواست را می‌پذیرد، route را اجرا و منابع محدود را مصرف می‌کند. صف پذیرش، thread pool/task scheduler، connection pool دیتابیس و ظرفیت DB زنجیره‌ای‌اند. اگر هر درخواست هم‌زمان سه اتصال می‌گیرد، زیادکردن API replicaها ممکن است connection بیشتری از توان DB باز کند. concurrency باید با semaphore/pool محدود شود؛ صف انتظار هم باید سقف و deadline داشته باشد. اندازهٔ pool را از سنجش saturation تعیین کن و headroom بگذار. readiness می‌گوید آیا نمونه ترافیک بگیرد؛ liveness می‌گوید آیا فرایند نیازمند restart است؛ این دو را یکی نکن.
+
+### State و load balancing
+
+در API stateless، هر درخواست credential و دادهٔ لازم را دارد یا state در مخزن مشترک خوانده می‌شود. session محلی نیاز به affinity دارد و خرابی/تعویض replica session را از بین می‌برد. Layer 4 اتصال را route می‌کند؛ Layer 7 می‌تواند path/header/HTTP را بفهمد و انعطاف بیشتر با سربار بیشتر می‌دهد. round-robin ساده است، اما اندازهٔ درخواست و بار نمونه‌ها را لحاظ نمی‌کند. Health check باید سنجهٔ عملیاتی درست داشته باشد و load balancer نباید نمونهٔ نیمه‌خراب را سالم بشمارد.
+
+### مثال قرارداد و نمونه
+
+```http
+POST /v1/orders
+Idempotency-Key: 75f3...
+Content-Type: application/json
+
+{"basketId":"b-42","version":18}
+```
+
+برای پردازش async، پاسخ `202 Accepted` فقط ثبت پایدار فرمان را تأیید می‌کند؛ `GET /v1/orders/{id}` وضعیت تکمیل را می‌دهد. قرارداد sync ممکن است `201` پس از commit بدهد. نمونه را براساس معنی تجاری انتخاب کن، نه فقط سرعت response.
+
+### تصمیم و تمرین
+
+| انتخاب | مناسب است | مراقب باش |
+| --- | --- | --- |
+| Stateless API | replica آزاد و failover لازم است | state را در request/token یا store مشترک نگه دار |
+| In-memory session | نمونهٔ کوچک و sticky routing پذیرفته است | restart و rebalance session را از دست می‌دهد |
+| Pool محدود | وابستگی ظرفیت محدود دارد | صف بزرگ فقط latency را پنهان می‌کند |
+| L7 proxy | routing براساس HTTP لازم است | هزینه و نقطهٔ تنظیمات جدید دارد |
+
+تمرین: یک API را با ۱ و ۳ replica اجرا کن؛ pool دیتابیس را عمداً کوچک بگذار، بار را بالا ببر و backlog، p99، اتصال فعال، timeout و نتیجهٔ failover را ثبت کن. بررسی کن آیا replicaهای اضافه ظرفیت موفق را زیاد کردند یا فقط صف DB را بزرگ‌تر کردند.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `ScalableApplicationServicesLab`.

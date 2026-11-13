@@ -40,6 +40,44 @@ Sharding به کلیدی نیاز دارد که هم محل داده را پید
 - sharding از نوع hash، value و range؛ locality، skew، hot partition و دشواری توزیع graph/join.
 - replication از نوع leader-follower و leaderless، strong/eventual consistency و رفتار CAP هنگام partition شبکه.
 
+## درس آموزشی
+
+### هدف‌های یادگیری و نقشهٔ مفهومی
+
+- scale-up، read replica، partitioning و sharding را از هم تفکیک کنیم.
+- برای distributed join، shared-everything و shared-nothing هزینه‌ها را بشناسیم.
+- نوع NoSQL را بر اساس access pattern و نه مد روز انتخاب کنیم.
+
+`query/constraintها → یک DB بهینه → scale-up/read replica → partition → shard/مدل دادهٔ توزیع‌شده`
+
+### مسیر رشد دیتابیس
+
+اول query plan، index، transaction duration، lock wait، buffer/cache، storage IOPS و connection pool را بررسی کن. Scale-up یک ماشین را قوی‌تر می‌کند و معمولاً تغییر اپلیکیشن کمی می‌خواهد؛ قیمت و سقف node و failure domain بزرگ‌تر می‌شود. Read replica خواندن را جدا می‌کند اما معمولاً نوشتن به primary می‌رود و replica lag می‌تواند read stale بسازد. Read-your-writes را با خواندن از leader یا routing session versionدار می‌توان حفظ کرد.
+
+Partitioning یک table یا dataset را به بخش‌های کوچک‌تر تقسیم می‌کند. افقی، ردیف‌ها را براساس range/hash/list key می‌برد؛ عمودی ستون‌ها یا گروه‌های access را جدا می‌کند. در DB واحد، partition می‌تواند pruning و حذف تاریخچه را ساده کند، اما partition زیاد planning/memory overhead می‌آورد. Sharding nodeها را جدا می‌کند: router با shard key مقصد را پیدا می‌کند. Query و transaction cross-shard، unique constraint جهانی، migration و rebalancing سخت‌تر می‌شوند. Shard key نامتوازن hotspot می‌سازد.
+
+Shared-everything منابع ذخیره‌سازی یا هماهنگی مشترک می‌دهد؛ Shared-nothing هر node CPU و disk خودش را دارد. اولی ممکن است هماهنگی و زیرساخت اختصاصی بخواهد؛ دومی routing، replica consistency و recovery می‌آورد. Distributed join گران است چون داده از شبکه جابه‌جا می‌شود؛ قبل از denormalize، query و data locality را با workload واقعی مدل کن.
+
+### چرا و کدام NoSQL؟
+
+Relational برای constraint، transaction و query انعطاف‌پذیر قوی است. Document برای aggregate تو‌در‌تو؛ key-value برای lookup با کلید؛ wide-column برای partition-based access با write زیاد؛ graph برای traversal رابطه‌ها. در NoSQL معمولاً schema/query plan از access pattern شروع می‌شود و بعضی readها با duplicate data ساده می‌شوند. نتیجهٔ این denormalization، update fan-out و consistency logic است. «NoSQL» یعنی یک family واحد نیست.
+
+### مثال انتخاب shard key
+
+برای `Orders`, اگر بیشتر خواندن‌ها `tenantId + orderId` است و هر tenant بار معقول دارد، این کلید می‌تواند routing خوبی بدهد. اگر یک tenant صد برابر دیگران بار دارد، shard گرم می‌شود. اگر زمان ایجاد کلید monotonically زیاد شود، range shard ممکن است writeهای تازه را روی یک سر بازه متمرکز کند. Hash توزیع را بهتر می‌کند اما range query را پخش می‌کند. این‌ها را با histogram کلید و بار بسنج.
+
+### تصمیم و تمرین
+
+| تکنیک | چه گلوگاهی را هدف می‌گیرد | چه چیزی را حل نمی‌کند |
+| --- | --- | --- |
+| Index/query tuning | scan و محاسبهٔ غیرضروری | ظرفیت یک writer داغ را نامحدود نمی‌کند |
+| Read replica | read load | write primary و lag را حذف نمی‌کند |
+| Table partition | حذف/خواندن بخش‌های dataset | خودکار چند node نمی‌سازد |
+| Sharding | سقف داده و throughput یک node | cross-shard transaction را ساده نمی‌کند |
+| NoSQL | access model خاص و scale افقی | join/consistency را رایگان نمی‌کند |
+
+تمرین: یک workload ثابت سفارش را روی PostgreSQL primary، primary+read replica و دو shard فرضی اجرا/مدل کن. correctness، p99 و هزینهٔ cross-shard query را ثبت و معیار مهاجرت به sharding را تعیین کن.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `ScalableDatabaseFundamentalsLab`.

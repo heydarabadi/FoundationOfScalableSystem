@@ -56,6 +56,24 @@ replication factor برابر N برای هر partition کپی leader/follower �
 - lag و ظرفیت پایین‌دست را کنار سلامت broker پایش کن؛ Kafka رویداد ذخیره می‌کند و برنامه منطق تجاری را اجرا می‌کند.
 
 
+## درس آموزشی: مدل داده و جریان Kafka
+
+### جداسازی command، event و projection
+
+Command درخواست انجام تغییر است؛ event واقعیتی است که پس از پذیرش/commit رخ داده؛ projection مدلی برای query سریع است. این نمونه commandهای سبد را در Kafka می‌پذیرد و Redis را projection خواندن سبد نگه می‌دارد؛ PostgreSQL در مسیر رزرو موجودی منبع تراکنشی است. پاسخ API با `202` یعنی فرمان ثبت شده، نه اینکه checkout و رزرو تمام شده است. وضعیت نهایی را باید از API وضعیت سفارش دنبال کرد.
+
+### Partition key و consumer scaling
+
+در این workload `basketId` کلید مناسبی برای نگه‌داشتن ترتیب تغییرهای یک سبد است؛ سبدهای جدا می‌توانند موازی شوند. Kafka تعداد partition ثابت دارد و consumer group آن‌ها را بین Podها تقسیم می‌کند. اگر Podها از partitionها بیشتر شوند، بخشی فعال نمی‌شوند؛ اگر lag زیاد باشد KEDA می‌تواند replicaهای processor را تغییر دهد، اما partition تازه یا broker نمی‌سازد. سقف scale باید با partition count و ظرفیت Redis/PostgreSQL هماهنگ باشد.
+
+### اثر پایدار و graceful shutdown
+
+Worker باید هنگام signal توقف، فراخوانی poll جدید را متوقف کند، پیام جاری را تا نتیجهٔ روشن پیش ببرد یا لغو قابل‌بازیابی کند، اثرهای موفق و pending را طبق قرارداد ثبت و offset را بعد از durability commit کند، سپس consumer را ببندد. Kubernetes نمی‌فهمد منطق business تمام شده؛ grace period فقط مهلت خروج می‌دهد. اگر زمان تمام شود پیام ممکن است redeliver شود، پس dedupe در دیتابیس و recovery ضروری است. زمان پیام با زمان خاموشی worker هماهنگ نمی‌شود.
+
+### تمرین راهنمای مخزن
+
+با `compose.yaml` از اجرای محلی شروع کن؛ سپس مسیرهای API → Kafka → basket processor → Redis و order → inventory processor → PostgreSQL را دنبال کن. با crash بین DB commit و Kafka offset commit پیام تکراری بساز و بررسی کن `processed_events` رزرو را دوباره اعمال نکند. بعد تعداد partition و consumer را تغییر بده؛ lag، rebalance، p99، DB pool و recovery را ثبت کن. پروفایل lab محلی اثبات ظرفیت production نیست.
+
 ## امکانات
 
 - ثبت فرمان‌های سبد در Kafka و ساخت read projection در Redis.

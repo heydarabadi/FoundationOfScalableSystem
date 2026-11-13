@@ -39,6 +39,38 @@ Flink dataflow منطقی را به DAG فیزیکی تبدیل می‌کند. p
 - مدل source/transform/sink در Flink DataStream، keyed partitioning، parallelism، task slot، task manager و operator chaining.
 - persistence state، checkpoint با stream barrier هماهنگ با offset منبع، restore/replay و جلوگیری از تکرار سمت sink.
 
+## درس آموزشی
+
+### هدف‌های یادگیری و نقشهٔ مفهومی
+
+- batch و stream و Lambda/Kappa را با نیاز تازگی و replay مقایسه کنیم.
+- operatorهای stateful، keying و window را طراحی کنیم.
+- checkpoint و sink behavior را در بازیابی لحاظ کنیم.
+
+`source → parse/filter/map → key/partition → state/window/join → checkpoint → sink`
+
+### Batch، Lambda و Kappa
+
+Batch دادهٔ محدود و تاریخی را در یک job می‌پردازد و برای بازپردازش حجیم مفید است. Stream روی رویدادهای پیوسته کار می‌کند و نتیجهٔ تازه می‌دهد، اما state و recovery را مدیریت می‌کند. Lambda دو مسیر batch دقیق و speed کم‌تأخیر دارد؛ دو مسیر باید نتیجه را هماهنگ کنند. Kappa با log قابل replay می‌تواند یک مسیر stream را برای تاریخچه/بازسازی هم به کار گیرد؛ replay بزرگ یا تغییر منطق ممکن است پرهزینه باشد. اگر freshness دقیقه‌ای کافی است، batch ساده‌تر را هم مقایسه کن.
+
+### Dataflow، state و window
+
+Pipeline معمولاً DAG از source/operator/sink است. Stateless filter/map هر رکورد را مستقل می‌پردازد؛ stateful operator شمارنده یا aggregation کلیددار را نگه می‌دارد. Keying رویدادهای مرتبط را به مالک یکسان state می‌رساند. Window جریان را برای محاسبه محدود می‌کند: tumbling بازه‌های مجزا و sliding بازه‌های هم‌پوشان دارد. زمان را مشخص کن: processing time یا event time؟ رویداد دیررس چه می‌شود؟ watermark/lateness policy زمان نهایی‌شدن window را تعیین می‌کند.
+
+### Parallelism و recovery
+
+Framework pipeline منطقی را به task موازی نگاشت می‌کند. parallelism بیشتر فقط وقتی سود دارد که source partition، شبکه، CPU و sink ظرفیت داشته باشند؛ skew کلید bottleneck می‌سازد. Checkpoint باید state و موقعیت source را هماهنگ نگه دارد؛ پس از شکست، job state را بازیابی و ورودی را replay می‌کند. Exactly-once end-to-end به sink transaction یا idempotency نیاز دارد؛ checkpoint تنها اثر خارجی را exactly-once نمی‌کند.
+
+### مثال و تمرین
+
+```text
+orders source → validate → keyBy(region)
+→ 5-minute event-time window, 1-minute slide
+→ count and sum → analytics store
+```
+
+این analytics است، نه کنترل موجودی تراکنشی. late event و duplicate را در تعریف نتیجه لحاظ کن. parallelism را 1، 2 و 4 کن و یک worker را متوقف کن؛ throughput، freshness p99، checkpoint duration، recovery time و duplicate sink effect را مقایسه کن.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `StatefulStreamProcessingLab`.

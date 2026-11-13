@@ -36,6 +36,57 @@ thread و زمان‌بندی؛ race و deadlock؛ هماهنگی؛ thread pool�
 - race و deadlock؛ وضعیت thread و سازوکارهای هماهنگی.
 - thread pool، barrier و collection ایمن برای کار موازی کنترل‌شده.
 
+## درس آموزشی
+
+### هدف‌های یادگیری و نقشهٔ مفهومی
+
+- concurrency را از parallelism جدا و مدل اجرا را با workload تطبیق دهیم.
+- race، deadlock و contention را با کنترل مالکیت و هماهنگی کاهش دهیم.
+- worker و صف bounded طراحی کنیم تا overload به منابع نامحدود تبدیل نشود.
+
+`ورودی → صف محدود → workerهای محدود → عملیات I/O یا CPU → نتیجه`
+
+### توضیح مفاهیم
+
+Concurrency یعنی چند کار در یک بازه پیشرفت کنند؛ parallelism یعنی چند کار روی چند هسته واقعاً هم‌زمان اجرا شوند. یک thread هنگام انتظار شبکه می‌تواند کار دیگری را انجام دهد، اما thread بیش از حد stack، context switch و contention را زیاد می‌کند. برای I/O-bound از async I/O یا workerهای محدود استفاده کن؛ برای CPU-bound موازی‌سازی را به ظرفیت هسته‌ها نزدیک کن و اندازه بگیر.
+
+Threadها stack جدا و process state مشترک دارند. اگر دو thread متغیر مشترک را تغییر دهند، عملیاتی مثل `count++` ممکن است interleave شود و update گم شود. گاهی بهتر است به‌جای lock، state را مالکیت‌محور کنیم: هر worker مالک state خودش باشد و نتیجه‌ها ادغام شوند، یا actor پیام‌ها را به مالک یگانهٔ state برساند. اگر lock لازم است، invariant را کوتاه محافظت کن و ترتیب گرفتن چند lock را ثابت نگه دار. Deadlock زمانی شکل می‌گیرد که چرخهٔ انتظار منابع ساخته شود.
+
+Producer-consumer به buffer محدود نیاز دارد. صف نامحدود وقتی مصرف‌کننده کند است فقط دیرتر حافظه را تمام می‌کند؛ صف bounded با wait/reject/drop امکان اعمال backpressure می‌دهد. Thread pool تعداد اجرای هم‌زمان را کنترل می‌کند. Shutdown هم باید بگوید کارهای پذیرفته‌شده drain می‌شوند یا cancellation می‌گیرند. Barrier برای منتظرماندن تا اتمام همهٔ workerهای یک مرحله است؛ `sleep` حدسی جای synchronization نیست.
+
+### نمونهٔ C# با صف bounded
+
+```csharp
+var channel = Channel.CreateBounded<WorkItem>(new BoundedChannelOptions(256)
+{
+    FullMode = BoundedChannelFullMode.Wait,
+    SingleReader = false,
+    SingleWriter = false
+});
+
+var workers = Enumerable.Range(0, workerCount).Select(_ => Task.Run(async () =>
+{
+    await foreach (var item in channel.Reader.ReadAllAsync(stoppingToken))
+        await ProcessAsync(item, stoppingToken);
+}));
+```
+
+`workerCount` و ظرفیت صف باید با latency، منابع و توان وابستگی تنظیم شوند، نه بر اساس عدد ثابت. برای shutdown، writer را کامل کن، مهلت drain بده و سپس cancellation را اعمال کن.
+
+### انتخاب مدل و تمرین
+
+| مدل | مناسب برای | هزینه/محدودیت |
+| --- | --- | --- |
+| Thread + lock | state مشترک کوچک با invariant کوتاه | contention و خطر deadlock |
+| Async + bounded queue | I/O زیاد و نیاز به backpressure | async خودکار CPU parallelism نیست |
+| Actor/mailbox | state با مالک یگانه و پیام‌رسانی | mailbox و supervision باید مدیریت شوند |
+| CSP/channel | pipelineهای producer-consumer | blocking و head-of-line را بسنج |
+| Event loop | I/O زیاد و عملیات غیرمسدودکننده | کار CPU سنگین loop را متوقف می‌کند |
+
+- در critical section عملیات شبکه یا DB انجام نده و صف/connection pool را بی‌سقف نگذار.
+- cancellation را تا پایین‌ترین API قابل لغو منتقل کن.
+- تست کن دو worker برای یک key نتوانند state ناسازگار بسازند؛ هم‌زمان contention و tail latency را اندازه بگیر.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `ConcurrentExecutionLab`.

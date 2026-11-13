@@ -13,6 +13,9 @@ This repository is a book-led learning and benchmarking catalog for scalability 
 - [طراحی سیستم — فارسی](docs/SYSTEM-DESIGN-MASTER-FA.md)
 - [Implementable solution blueprints — English](docs/IMPLEMENTABLE-SOLUTION-BLUEPRINTS-EN.md)
 - [طرح‌های قابل پیاده‌سازی — فارسی](docs/IMPLEMENTABLE-SOLUTION-BLUEPRINTS-FA.md)
+- [Database families: implementation guide (Persian)](docs/DATABASE-FAMILIES-IMPLEMENTATION-GUIDE-FA.md)
+- [Concurrency languages and approaches (Persian)](docs/CONCURRENCY-LANGUAGES-AND-APPROACHES-FA.md)
+- [Architectural approaches playbook (Persian)](docs/ARCHITECTURAL-APPROACHES-PLAYBOOK-FA.md)
 
 ## Solutions
 
