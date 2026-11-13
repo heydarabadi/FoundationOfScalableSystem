@@ -60,6 +60,11 @@ if ($KindClusterName -and $ExpectedContext -ne "kind-$KindClusterName") {
     throw "KindClusterName '$KindClusterName' normally uses context 'kind-$KindClusterName', but ExpectedContext is '$ExpectedContext'. Refusing to load images into a potentially different cluster."
 }
 
+& kubectl --context $ExpectedContext get crd gateways.gateway.networking.k8s.io *> $null
+if ($LASTEXITCODE -ne 0) {
+    throw "Gateway API CRDs are missing. Install Envoy Gateway v1.10.0 before deploying the HPT lab."
+}
+
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 $namespaceFile = Join-Path $repoRoot "infra\kubernetes\namespace.yaml"
 $labRoot = Join-Path $repoRoot "infra\kubernetes\lab"
@@ -76,6 +81,9 @@ Write-Host "Deploying the HPT lab to context '$ExpectedContext'."
 Write-Warning "This lab uses development credentials and single-instance Redis/PostgreSQL. Do not use it as a production profile."
 
 Invoke-Kubectl @("apply", "-f", $namespaceFile)
+Invoke-Kubectl @("apply", "-f", (Join-Path $labRoot "metrics-server.yaml"))
+Invoke-Kubectl @("wait", "deployment/metrics-server", "-n", "kube-system", "--for=condition=Available", "--timeout=5m")
+Invoke-Kubectl @("wait", "apiservice/v1beta1.metrics.k8s.io", "--for=condition=Available", "--timeout=5m")
 
 $initConfigMap = & kubectl --context $ExpectedContext create configmap hpt-postgres-init `
     -n hpt `
@@ -130,6 +138,9 @@ Invoke-Kubectl @("rollout", "status", "deployment/hpt-api", "-n", "hpt", "--time
 Invoke-Kubectl @("rollout", "status", "deployment/hpt-basket-processor", "-n", "hpt", "--timeout=10m")
 Invoke-Kubectl @("rollout", "status", "deployment/hpt-inventory-processor", "-n", "hpt", "--timeout=10m")
 Invoke-Kubectl @("rollout", "status", "deployment/hpt-web", "-n", "hpt", "--timeout=10m")
+Invoke-Kubectl @("apply", "-f", (Join-Path $labRoot "api-gateway.yaml"))
+Invoke-Kubectl @("wait", "gateway/hpt-gateway", "-n", "hpt", "--for=condition=Programmed", "--timeout=5m")
+Invoke-Kubectl @("wait", "httproute/hpt-api-route", "-n", "hpt", "--for=condition=Accepted", "--timeout=5m")
 
 Invoke-Kubectl @("apply", "-f", (Join-Path $labRoot "observability-exporters.yaml"))
 Invoke-Kubectl @("apply", "-f", (Join-Path $labRoot "prometheus.yaml"))

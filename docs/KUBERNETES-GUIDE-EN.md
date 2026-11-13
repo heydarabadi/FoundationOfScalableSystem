@@ -63,6 +63,27 @@ The repeatable deployment script runs the lab setup and rollouts. For kind, prov
 
 For Docker Desktop, use `-ExpectedContext docker-desktop` and omit `-KindClusterName`. The script checks the current context and stops if it differs from the expected context. It then rebuilds images and restarts application Deployments so they use the new local image. Never use lab manifests or sample credentials in production.
 
+To enable Gateway API ingress and CPU-aware routing, install Envoy Gateway v1.10.0 in the same context before running the script. Install the chart once:
+
+```powershell
+helm upgrade --install eg oci://docker.io/envoyproxy/gateway-helm --version v1.10.0 -n envoy-gateway-system --create-namespace
+kubectl wait --timeout=5m -n envoy-gateway-system deployment/envoy-gateway --for=condition=Available
+```
+
+The script also applies the lab Metrics Server and the project's `GatewayClass`, `Gateway`, `HTTPRoute`, and `BackendTrafficPolicy`. Inbound requests go through the Gateway to `api:8080`. On each API response, the API emits the ORCA `endpoint-load-metrics` header with a CPU sample for its process normalized against the container CPU quota; Envoy uses those reports to weight endpoints. The Gateway removes this header from client responses by default. Without ORCA reports, the policy cannot see each Pod's actual CPU load.
+
+Verify the setup:
+
+```powershell
+kubectl get gateway,httproute -n hpt
+kubectl get backendtrafficpolicy -n hpt
+kubectl top pods -n hpt
+kubectl get hpa -n hpt
+kubectl port-forward -n hpt svc/api 5080:8080
+```
+
+In another terminal, `curl.exe -i http://localhost:5080/health/live` should show the `endpoint-load-metrics` header. To test the Gateway path, find the `envoy-hpt-hpt-gateway-*` Service in `envoy-gateway-system` and port-forward it; `/health/live` should return `200`. The internal ORCA header is stripped from the Gateway response. The lab Metrics Server uses a legacy-compatible image and `--kubelet-insecure-tls` only for local clusters; do not use those settings in production.
+
 ### Manual lab setup
 
 From the repository root:

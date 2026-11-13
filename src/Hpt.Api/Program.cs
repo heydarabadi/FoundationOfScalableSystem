@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Globalization;
 using System.Diagnostics.Metrics;
 using System.Diagnostics;
 using System.Threading.RateLimiting;
@@ -64,17 +65,35 @@ builder.Services.AddSingleton<IProducer<string, string>>(_ =>
 
 builder.Services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(redisConnection));
 builder.Services.AddSingleton(_ => NpgsqlDataSource.Create(inventoryConnection));
+builder.Services.AddSingleton<Hpt.Api.CpuLoadSampler>();
+builder.Services.AddHostedService(services => services.GetRequiredService<Hpt.Api.CpuLoadSampler>());
 builder.Services.AddMemoryCache();
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
     policy.WithOrigins(builder.Configuration["Web:Origin"] ?? "http://localhost:5173")
         .AllowAnyHeader().AllowAnyMethod()));
 
 var app = builder.Build();
+var cpuLoadSampler = app.Services.GetRequiredService<Hpt.Api.CpuLoadSampler>();
+meter.CreateObservableGauge(
+    "hpt.api.cpu.utilization",
+    () => cpuLoadSampler.Utilization,
+    unit: "1",
+    description: "Container CPU utilization fraction reported to the HTTP load balancer.");
 // Emit a zero-valued series after the meter provider starts so Prometheus can detect the first failure.
 app.Lifetime.ApplicationStarted.Register(() =>
 {
     kafkaPublishFailures.Add(0, new KeyValuePair<string, object?>("mode", "batch"));
     batchRejections.Add(0);
+});
+app.Use(async (context, next) =>
+{
+    context.Response.OnStarting(() =>
+    {
+        var utilization = cpuLoadSampler.Utilization.ToString("0.000", CultureInfo.InvariantCulture);
+        context.Response.Headers["endpoint-load-metrics"] = $"JSON {{\"cpu_utilization\":{utilization}}}";
+        return Task.CompletedTask;
+    });
+    await next();
 });
 app.UseRouting();
 app.UseOpenTelemetryPrometheusScrapingEndpoint();

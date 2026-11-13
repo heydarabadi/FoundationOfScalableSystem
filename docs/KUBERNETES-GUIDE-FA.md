@@ -65,6 +65,27 @@ kubectl cluster-info
 
 برای Docker Desktop از `-ExpectedContext docker-desktop` استفاده و `-KindClusterName` را حذف کنید. script context جاری را بررسی می‌کند و اگر نامش مطابق انتظار نباشد متوقف می‌شود؛ بعد از ساخت imageها deploymentهای برنامه را restart می‌کند تا image محلی تازه را بگیرند. برای محیط واقعی از manifestهای lab و credential نمونه استفاده نکنید.
 
+برای این‌که Gateway API و ترافیک ورودی CPU-aware هم راه‌اندازی شود، پیش از script، Envoy Gateway v1.10.0 را روی همان context نصب کنید. chart فقط یک بار نصب می‌شود:
+
+```powershell
+helm upgrade --install eg oci://docker.io/envoyproxy/gateway-helm --version v1.10.0 -n envoy-gateway-system --create-namespace
+kubectl wait --timeout=5m -n envoy-gateway-system deployment/envoy-gateway --for=condition=Available
+```
+
+script، Metrics Server مخصوص lab و منابع `GatewayClass`, `Gateway`, `HTTPRoute` و `BackendTrafficPolicy` پروژه را هم اعمال می‌کند. درخواست ورودی از Gateway به `api:8080` می‌رود. API در پاسخ، header استاندارد ORCA به نام `endpoint-load-metrics` را با نمونهٔ CPU process نسبت به CPU quota کانتینر می‌فرستد؛ Envoy از این گزارش برای وزن‌دهی endpointها استفاده می‌کند. Gateway به‌طور پیش‌فرض این header را به client برنمی‌گرداند. بدون گزارش ORCA، policy نمی‌تواند CPU واقعی Pod را بسنجد.
+
+برای بررسی:
+
+```powershell
+kubectl get gateway,httproute -n hpt
+kubectl get backendtrafficpolicy -n hpt
+kubectl top pods -n hpt
+kubectl get hpa -n hpt
+kubectl port-forward -n hpt svc/api 5080:8080
+```
+
+در پنجرهٔ دیگر، `curl.exe -i http://localhost:5080/health/live` باید header `endpoint-load-metrics` را نشان دهد. برای آزمودن مسیر Gateway، Serviceای با نام `envoy-hpt-hpt-gateway-*` را در `envoy-gateway-system` پیدا و همان را port-forward کنید؛ پاسخ `/health/live` باید `200` باشد. header داخلی ORCA از پاسخ Gateway حذف می‌شود. Metrics Server برای HPA لازم است؛ lab image سازگار قدیمی‌تر و `--kubelet-insecure-tls` را فقط برای کلاستر محلی به‌کار می‌برد و این تنظیمات برای production مناسب نیستند.
+
 از ریشهٔ repo:
 
 ```powershell
