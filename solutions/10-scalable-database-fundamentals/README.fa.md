@@ -78,6 +78,20 @@ Relational برای constraint، transaction و query انعطاف‌پذیر ق
 
 تمرین: یک workload ثابت سفارش را روی PostgreSQL primary، primary+read replica و دو shard فرضی اجرا/مدل کن. correctness، p99 و هزینهٔ cross-shard query را ثبت و معیار مهاجرت به sharding را تعیین کن.
 
+### توزیع داده و CAP
+
+Scale-up منابع یک node را زیاد می‌کند؛ read replica خواندن را توزیع می‌کند ولی write و replica lag باقی می‌ماند؛ partitioning داده را به بخش‌های قابل‌مدیریت تقسیم می‌کند و sharding آن را میان nodeها پخش می‌کند. سامانه‌هایی مانند Oracle RAC نمونه‌ای از معماری چند node با storage مشترک‌اند؛ در مقابل، معماری shared-nothing هر node را مالک بخشی از داده/کار می‌کند. این‌ها trade-offهای متفاوتی در contention، failover، شبکه و عملیات دارند، نه نردبان قطعی از بد به خوب.
+
+NoSQL یک مدل واحد نیست: key-value، سند، wide-column و graph برای queryهای متفاوت ساخته شده‌اند. access pattern، قابلیت query، transaction و روش توزیع باید پیش از schema روشن باشند؛ وقتی queryهای دلخواه و joinهای رابطه‌ای مهم‌اند، مدل‌دهی صرفاً برای کلید ممکن است هزینهٔ برنامه را زیاد کند. CAP در حضور partition شبکه، انتخاب میان پاسخ‌گویی و consistency مشخص را برجسته می‌کند؛ در روزمرگی نیز partition، quorum و تعریفی که از consistency داریم تعیین‌کننده‌اند.
+
+### خودآزمایی همراه پاسخ
+
+1. **پرسش:** چه وقت partitioning/sharding را جلو می‌اندازیم؟
+   **پاسخ کوتاه:** پس از اندازه‌گیری سقف واقعی storage/IO/CPU و بررسی ساده‌ترهایی چون index، query، scale-up و read replica؛ shard key باید query و توزیع را پوشش دهد.
+
+2. **پرسش:** CAP چه می‌گوید؟
+   **پاسخ کوتاه:** در هنگام partition شبکه، سیستم توزیع‌شده باید میان پاسخ‌دهی و تضمین سازگاریِ تعریف‌شده انتخاب کند؛ CAP به معنی انتخاب دائمی دو مورد از سه مورد در همهٔ شرایط نیست.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `ScalableDatabaseFundamentalsLab`.
@@ -119,10 +133,18 @@ latency هر query در p50/p95/p99، write throughput، replication lag، حج�
 - چه گلوگاه یا هزینهٔ عملیاتی تازه‌ای ایجاد می‌شود؟
 - چه نتیجه‌ای باعث رد کردن این طراحی می‌شود؟
 
-## رفرنس‌ها
+## منابع
+
+### مبنای کتاب
 
 - Ian Gorton، *Foundations of Scalable Systems*، فصل 10: “Scalable Database Fundamentals” — [صفحهٔ فصل در O’Reilly](https://www.oreilly.com/library/view/foundations-of-scalable/9781098106058/ch10.html).
+
+### مستندات فنی بیرونی
+
 - مستندات فنی اولیه: [مرجع رسمی](https://www.postgresql.org/docs/current/ddl-partitioning.html).
+
+### پیوندهای این مخزن
+
 - نقشهٔ فصل‌ها و ترتیب پیاده‌سازی مخزن: [نقشهٔ راه فارسی](../../docs/SCALABILITY-ROADMAP-FA.md).
 
 ## نام‌گذاری و استقلال

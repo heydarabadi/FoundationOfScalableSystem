@@ -73,6 +73,26 @@ Redis ساختارهای دادهٔ in-memory دارد و برای lookup سری
 
 سه variant برای «افزودن کالا به سبد» بساز. هرکدام idempotency key، version/order، expiry، read-your-write و recovery را مشخص کند. با payload و ترکیب بار یکسان و قطع node، correctness، p99، durability و هزینه را مقایسه کن.
 
+### خواندن پیاده‌سازی‌ها به شکل مقایسه‌ای
+
+در Redis، مدل commandهای key/value و ساختارهایی مثل hash، set و sorted set معمولاً برای دسترسی سریع به کلید مناسب‌اند؛ persistence و replication باید از configuration واقعی همان نسخه بررسی شوند. MongoDB سند را برای خواندن/نوشتن aggregateهای مرتبط کنار هم می‌گذارد؛ index، اندازهٔ سند، shard key و انتخاب replica read اهمیت دارند. DynamoDB access pattern را با partition key/sort key و indexهای از پیش طراحی‌شده جواب می‌دهد؛ کلید داغ، throttling و هزینهٔ ظرفیت باید سنجیده شود.
+
+برای یک مدل مقایسهٔ درست، عملیات یکسان (مثلاً get/update سبد با version شرطی) و دادهٔ هم‌حجم را بساز؛ سپس throughput، p99، write amplification، durability پس از crash، failover، هزینه و complexity را اندازه بگیر. محصول به‌تنهایی تضمین consistency یا durability ثابتی ندارد؛ نسخه، topology و تنظیمات بخشی از نتیجه‌اند.
+
+### مثال عملی: یک سبد در سه مدل داده
+
+برای `basketId=42`، در Redis می‌توان کلید `basket:42` را به hash سبد تبدیل کرد؛ در MongoDB یک سند `{ _id: 42, version: 8, items: [...] }` کل aggregate را نگه دارد؛ در DynamoDB کلید اصلی می‌تواند `PK=BASKET#42` و `SK=ITEM#<sku>` باشد و metadata سبد در sort key جدا ذخیره شود. در هر سه حالت update شرطی روی version یا stock لازم است تا دو update هم‌زمان بی‌صدا همدیگر را overwrite نکنند.
+
+برای مقایسه، همان فرمان «افزودن SKU با idempotency key» را اجرا کن. در Redis، رفتار transaction/script و persistence را؛ در MongoDB، atomic update روی سند و index را؛ در DynamoDB، conditional write و طراحی query را بررسی کن. اگر یک سبد واقعاً از چند سند/کلید تشکیل شده، مرز transaction هر گزینه و rebuild/backup را هم اندازه بگیر. این مثال شکل مدل‌سازی است؛ syntax و جزئیات اجرایی را با نسخه و تنظیم واقعی سرویس بررسی کن.
+
+### خودآزمایی همراه پاسخ
+
+1. **پرسش:** Redis، MongoDB و DynamoDB را با چه مبنایی مقایسه می‌کنیم؟
+   **پاسخ کوتاه:** با access pattern، مدل داده و query، durability/replication، consistency، هزینهٔ عملیات و failure behavior؛ نه با برچسب کلی NoSQL.
+
+2. **پرسش:** چرا تست default configuration کافی نیست؟
+   **پاسخ کوتاه:** چون persistence، replication، acknowledgment و consistency تنظیم‌پذیرند؛ باید هر موتور را با تضمین‌های هدف هم‌ارز پیکربندی و در failover آزمایش کرد.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `DistributedDatabaseModelComparisonLab`.
@@ -114,10 +134,18 @@ latency هر عملیات در p50/p95/p99، throughput، index/write amplificat
 - چه گلوگاه یا هزینهٔ عملیاتی تازه‌ای ایجاد می‌شود؟
 - چه نتیجه‌ای باعث رد کردن این طراحی می‌شود؟
 
-## رفرنس‌ها
+## منابع
+
+### مبنای کتاب
 
 - Ian Gorton، *Foundations of Scalable Systems*، فصل 13: “Distributed Database Implementations” — [صفحهٔ فصل در O’Reilly](https://www.oreilly.com/library/view/foundations-of-scalable/9781098106058/ch13.html).
+
+### مستندات فنی بیرونی
+
 - مستندات فنی اولیه: [مرجع رسمی](https://www.mongodb.com/docs/manual/sharding/).
+
+### پیوندهای این مخزن
+
 - نقشهٔ فصل‌ها و ترتیب پیاده‌سازی مخزن: [نقشهٔ راه فارسی](../../docs/SCALABILITY-ROADMAP-FA.md).
 
 ## نام‌گذاری و استقلال

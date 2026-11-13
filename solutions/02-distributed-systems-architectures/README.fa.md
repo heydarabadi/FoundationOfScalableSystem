@@ -76,6 +76,14 @@ request → API → (synchronous DB write | durable command queue)
 - «سرویس بیشتر» را خودکار معادل scalability ندان.
 - کدام عملیات باید synchronous باشد و کدام می‌تواند eventual باشد؟ اگر صف سریع‌تر پر شود از مصرف‌کننده، backpressure کجا اعمال می‌شود؟
 
+### خودآزمایی همراه پاسخ
+
+1. **پرسش:** چه زمانی scale-out سرویس برنامه بی‌اثر می‌شود؟
+   **پاسخ کوتاه:** وقتی state محلی مانع توزیع درخواست باشد یا وابستگی مشترکی مانند دیتابیس پیش از سرویس اشباع شود.
+
+2. **پرسش:** صف چه چیزی را بهتر می‌کند و چه چیزی را حل نمی‌کند؟
+   **پاسخ کوتاه:** جهش ورودی را جذب و کار را غیرهم‌زمان می‌کند؛ ظرفیت نامحدود ایجاد نمی‌کند و lag، duplicate و نتیجهٔ دیرتر را باید مدیریت کرد.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `DistributedArchitectureTradeoffLab`.
@@ -105,10 +113,18 @@ Per-tier latency, saturation point, network and database utilization, and failur
 - چه گلوگاه یا هزینهٔ عملیاتی تازه‌ای ایجاد می‌شود؟
 - چه نتیجه‌ای باعث رد کردن این طراحی می‌شود؟
 
-## رفرنس‌ها
+## منابع
+
+### مبنای کتاب
 
 - Ian Gorton، *Foundations of Scalable Systems*، فصل 02: “Distributed Systems Architectures: An Introduction” — [صفحهٔ فصل در O’Reilly](https://www.oreilly.com/library/view/foundations-of-scalable/9781098106058/ch02.html).
+
+### مستندات فنی بیرونی
+
 - مستندات فنی اولیه: [مرجع رسمی](https://kubernetes.io/docs/concepts/).
+
+### پیوندهای این مخزن
+
 - نقشهٔ فصل‌ها و ترتیب پیاده‌سازی مخزن: [نقشهٔ راه فارسی](../../docs/SCALABILITY-ROADMAP-FA.md).
 
 ## نام‌گذاری و استقلال

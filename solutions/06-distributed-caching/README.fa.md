@@ -87,6 +87,18 @@ on write: commit DB → invalidate old key or publish new version
 
 تمرین: endpoint read-heavy را بدون cache، cache-aside و invalidation versionدار اجرا کن. miss rate، DB QPS، p99، stale response و رفتار با Redis قطع‌شده را ثبت کن.
 
+### تازگی cache وب
+
+Cache-Control policy را برای browser و shared proxyها مشخص می‌کند؛ `max-age` مهلت تازگی است و `private`/`public` روی اشتراک‌گذاری اثر دارد. `Expires` مهلت زمانی مطلق می‌دهد. پس از کهنه‌شدن، `ETag` یا `Last-Modified` می‌تواند درخواست شرطی بسازد: اگر نسخه عوض نشده، سرور `304 Not Modified` می‌دهد و body دوباره منتقل نمی‌شود. این validatorها اندازهٔ پاسخ و فشار origin را کم می‌کنند، اما خودشان invalidation دادهٔ حساس یا مجوز دسترسی را حل نمی‌کنند. پاسخ شخصی را با cache key و header مناسب از cache مشترک جدا کن.
+
+### خودآزمایی همراه پاسخ
+
+1. **پرسش:** cache hit بالا، به‌تنهایی موفقیت است؟
+   **پاسخ کوتاه:** خیر؛ باید تازگی، نرخ خطا، هزینه و بار منبع را دید. stale data یا cache stampede می‌تواند نتیجه را بدتر کند.
+
+2. **پرسش:** چه تفاوتی میان ETag و Expires/Cache-Control هست؟
+   **پاسخ کوتاه:** Cache-Control/Expires freshness را زمان‌محور اعلام می‌کند؛ ETag validator می‌دهد تا client با درخواست شرطی بپرسد آیا نسخه تغییر کرده است.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `DistributedCacheBehaviorLab`.
@@ -116,10 +128,18 @@ Hit ratio, backend load, latency, stale-read window, memory use, and recovery af
 - چه گلوگاه یا هزینهٔ عملیاتی تازه‌ای ایجاد می‌شود؟
 - چه نتیجه‌ای باعث رد کردن این طراحی می‌شود؟
 
-## رفرنس‌ها
+## منابع
+
+### مبنای کتاب
 
 - Ian Gorton، *Foundations of Scalable Systems*، فصل 06: “Distributed Caching” — [صفحهٔ فصل در O’Reilly](https://www.oreilly.com/library/view/foundations-of-scalable/9781098106058/ch06.html).
+
+### مستندات فنی بیرونی
+
 - مستندات فنی اولیه: [مرجع رسمی](https://redis.io/docs/latest/develop/use/patterns/).
+
+### پیوندهای این مخزن
+
 - نقشهٔ فصل‌ها و ترتیب پیاده‌سازی مخزن: [نقشهٔ راه فارسی](../../docs/SCALABILITY-ROADMAP-FA.md).
 
 ## نام‌گذاری و استقلال

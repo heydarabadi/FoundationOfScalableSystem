@@ -38,7 +38,7 @@
 | 11. سازگاری نهایی | [فارسی](../solutions/11-eventual-consistency/README.fa.md) · [English](../solutions/11-eventual-consistency/README.md) |
 | 12. سازگاری قوی | [فارسی](../solutions/12-strong-consistency/README.fa.md) · [English](../solutions/12-strong-consistency/README.md) |
 | 13. پیاده‌سازی‌های پایگاه‌دادهٔ توزیع‌شده | [فارسی](../solutions/13-distributed-database-implementations/README.fa.md) · [English](../solutions/13-distributed-database-implementations/README.md) |
-| 14. Scalable Event-Driven Processing — پردازش رویدادمحور مقیاس‌پذیر | [فارسی](../solutions/14-scalable-event-driven-processing/README.fa.md) · [English](../solutions/14-scalable-event-driven-processing/README.md) |
+| 14. Scalable Event-Driven Processing — پردازش رویدادمحور مقیاس‌پذیر | [درس کامل فارسی](../solutions/14-scalable-event-driven-processing/CHAPTER-GUIDE-FA.md) · [راهنمای اجرای فارسی](../solutions/14-scalable-event-driven-processing/README.fa.md) · [English](../solutions/14-scalable-event-driven-processing/README.md) |
 | 15. سامانه‌های پردازش Stream | [فارسی](../solutions/15-stream-processing-systems/README.fa.md) · [English](../solutions/15-stream-processing-systems/README.md) |
 | 16. توصیه‌های پایانی برای موفقیت | [فارسی](../solutions/16-final-tips-for-success/README.fa.md) · [English](../solutions/16-final-tips-for-success/README.md) |
 | فصل کتاب | موضوع به‌اختصار | کاربرد در مخزن |

@@ -76,6 +76,22 @@ Leader ورودی‌ها را در log مرتب می‌کند؛ followerها ک�
 
 تمرین: 2PC trace را در participant failure، coordinator failure قبل prepare و بعد prepare رسم کن. سپس Raft cluster را با 3 node تصور کن: کدام nodeها می‌توانند commit را تأیید کنند و رفتار client سمت minority چیست؟
 
+### مدل consistency و دو پروتکل
+
+Consistency یک نام واحد نیست. Linearizability هر عملیات را طوری می‌بیند که گویی در یک لحظهٔ مرتب‌شده بین شروع و پایان انجام شده؛ serializability ترتیب تراکنش‌های concurrent را معادل ترتیبی سریالی می‌کند، ولی به‌تنهایی زمان واقعی را تضمین نمی‌کند. تعریف تضمین لازم را برای هر query/write ثبت کن تا strong consistency شعار مبهم نباشد.
+
+در Two-Phase Commit، coordinator ابتدا از participantها prepare می‌خواهد و سپس commit یا abort را اعلام می‌کند. participant آماده ممکن است تا برگشت coordinator قفل و منابع را نگه دارد؛ crash coordinator می‌تواند transaction را در حالت in-doubt بگذارد. Consensus مانند Raft روی log/ترتیب مشترک در یک گروه و با رهبر منتخب کار می‌کند و پیشروی را به quorum وابسته می‌سازد؛ این جایگزین مستقیم 2PC برای یک transaction دلخواه میان چند دیتابیس نیست.
+
+نمونه‌های فصل مانند VoltDB و Spanner راه‌های متفاوتی برای تراکنش/سازگاری قوی نشان می‌دهند و برای یادگیری مدل‌اند، نه دلیل برتری عمومی. قبل از پذیرش، latency بین گره‌ها، contention، failure mode، recovery و هزینهٔ اداره را برای همان invariant بسنج.
+
+### خودآزمایی همراه پاسخ
+
+1. **پرسش:** 2PC و consensus یک مفهوم‌اند؟
+   **پاسخ کوتاه:** نه؛ 2PC یک transaction را بین participantها آماده/commit می‌کند و coordinator می‌تواند آن را در حالت انتظار بگذارد؛ consensus روی مقدار/ترتیب مشترک میان اعضا توافق می‌کند.
+
+2. **پرسش:** چه زمانی strong consistency را می‌پذیریم؟
+   **پاسخ کوتاه:** وقتی invariant کسب‌وکار خواندن stale یا دو write متعارض را تحمل نمی‌کند؛ باید هزینهٔ latency و کاهش پیشروی هنگام نبود quorum را هم بپذیریم.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `StrongConsistencyTransactionLab`.
@@ -116,10 +132,18 @@ latency commit بر حسب تعداد partition، نرخ abort/retry، مدت lo
 - چه گلوگاه یا هزینهٔ عملیاتی تازه‌ای ایجاد می‌شود؟
 - چه نتیجه‌ای باعث رد کردن این طراحی می‌شود؟
 
-## رفرنس‌ها
+## منابع
+
+### مبنای کتاب
 
 - Ian Gorton، *Foundations of Scalable Systems*، فصل 12: “Strong Consistency” — [صفحهٔ فصل در O’Reilly](https://www.oreilly.com/library/view/foundations-of-scalable/9781098106058/ch12.html).
+
+### مستندات فنی بیرونی
+
 - مستندات فنی اولیه: [مرجع رسمی](https://raft.github.io/raft.pdf).
+
+### پیوندهای این مخزن
+
 - نقشهٔ فصل‌ها و ترتیب پیاده‌سازی مخزن: [نقشهٔ راه فارسی](../../docs/SCALABILITY-ROADMAP-FA.md).
 
 ## نام‌گذاری و استقلال

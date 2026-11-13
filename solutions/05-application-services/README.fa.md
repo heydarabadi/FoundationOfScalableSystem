@@ -83,6 +83,20 @@ Content-Type: application/json
 
 تمرین: یک API را با ۱ و ۳ replica اجرا کن؛ pool دیتابیس را عمداً کوچک بگذار، بار را بالا ببر و backlog، p99، اتصال فعال، timeout و نتیجهٔ failover را ثبت کن. بررسی کن آیا replicaهای اضافه ظرفیت موفق را زیاد کردند یا فقط صف DB را بزرگ‌تر کردند.
 
+### Session affinity، سلامت و elasticity
+
+Load balancer می‌تواند round-robin، least-connections یا policyهای مبتنی بر بار را به کار ببرد؛ هیچ الگوریتمی جای health signal درست را نمی‌گیرد. Readiness می‌گوید replica الان آمادهٔ دریافت ترافیک است؛ liveness برای تشخیص process گیرکرده و restart است. Health check باید سبک باشد و خرابی downstream کوتاه‌مدت را به restart storm تبدیل نکند.
+
+Session affinity کاربر را به همان replica می‌فرستد و برای برنامهٔ stateful قدیمی راه گذار است، اما replicaهای قابل‌تعویض را سخت‌تر می‌کند و با خرابی همان نمونه session را از دسترس خارج می‌سازد. برای scale آزادتر، session را در token امن یا store مشترک نگه دار. Elasticity فقط بالا بردن تعداد replica نیست: health، ظرفیت پایین‌دست، زمان آماده‌شدن replica و رفتار scale-in هم باید در نظر گرفته شوند.
+
+### خودآزمایی همراه پاسخ
+
+1. **پرسش:** چه زمانی session affinity کمک می‌کند و چرا stateless بودن معمولاً بهتر scale می‌شود؟
+   **پاسخ کوتاه:** Affinity می‌تواند state محلی قدیمی را برای همان client نگه دارد، اما توزیع بار و failover را محدود می‌کند؛ state مشترک یا token خودبسنده آزادی بیشتری می‌دهد.
+
+2. **پرسش:** Load balancer چگونه خرابی endpoint را تشخیص می‌دهد؟
+   **پاسخ کوتاه:** با health check/سیگنال readiness و policy مشخص؛ liveness برنامه را راه‌اندازی مجدد می‌کند و readiness تعیین می‌کند endpoint ترافیک بگیرد یا نه.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `ScalableApplicationServicesLab`.
@@ -112,10 +126,18 @@ Request rate, latency distribution, error rate, instance skew, and recovery afte
 - چه گلوگاه یا هزینهٔ عملیاتی تازه‌ای ایجاد می‌شود؟
 - چه نتیجه‌ای باعث رد کردن این طراحی می‌شود؟
 
-## رفرنس‌ها
+## منابع
+
+### مبنای کتاب
 
 - Ian Gorton، *Foundations of Scalable Systems*، فصل 05: “Application Services” — [صفحهٔ فصل در O’Reilly](https://www.oreilly.com/library/view/foundations-of-scalable/9781098106058/ch05.html).
+
+### مستندات فنی بیرونی
+
 - مستندات فنی اولیه: [مرجع رسمی](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/servers/).
+
+### پیوندهای این مخزن
+
 - نقشهٔ فصل‌ها و ترتیب پیاده‌سازی مخزن: [نقشهٔ راه فارسی](../../docs/SCALABILITY-ROADMAP-FA.md).
 
 ## نام‌گذاری و استقلال

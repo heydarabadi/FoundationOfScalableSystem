@@ -82,6 +82,20 @@ Order: Pending → Inventory: Reserved → Payment: Authorized → Order: Confir
 
 تمرین: سفارش را به سه سرویس تقسیم نکن تا اول SLO و ownership هرکدام را بنویسی؛ سپس یک مرحله را عمداً timeout کن و اثبات کن retry/compensation سفارش دوگانه نمی‌سازد. trace id را از gateway تا همهٔ eventها حفظ کن.
 
+### اصل مرزبندی و مهار خرابی زنجیره‌ای
+
+Microserviceها باید از نظر قابلیت کسب‌وکار و مالکیت داده مرز داشته باشند؛ shared database و release هماهنگ، استقلال ادعایی را از بین می‌برد. هر سرویس قرارداد شبکه، پایش، versioning و ادارهٔ جدا می‌خواهد؛ بنابراین تقسیم monolith را با هزینهٔ عملیاتی هم بسنج.
+
+وقتی dependency کند می‌شود، thread و connection می‌مانند و timeout/retry از چند سرویس فشار را تکثیر می‌کند؛ این cascade failure است. Deadline انتهابه‌انتها، retry محدود با jitter، circuit breaker و bulkhead به مهار کمک می‌کنند. Bulkhead pool/ظرفیت را برای مسیرها جدا می‌کند تا یک وابستگی همهٔ کارها را مصرف نکند؛ آن را با queue محدود و load shedding ترکیب کن و برای بازگشت سرویس هم مراقب retry storm باش.
+
+### خودآزمایی همراه پاسخ
+
+1. **پرسش:** چه چیزی مرز مناسبی برای استخراج microservice است؟
+   **پاسخ کوتاه:** قابلیت کسب‌وکار با مالکیت داده و تغییر مستقل؛ صرفاً جداکردن کلاس‌ها یا تیم کوچک دلیل کافی نیست.
+
+2. **پرسش:** Bulkhead جلوی چه نوع خرابی را می‌گیرد؟
+   **پاسخ کوتاه:** منابع را ایزوله می‌کند تا اشباع یک وابستگی یا مسیر کل سرویس را زمین نزند؛ خودش مشکل وابستگی یا دادهٔ خراب را رفع نمی‌کند.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `ServiceBoundaryResilienceLab`.
@@ -123,10 +137,18 @@ latency سرتاسری p50/p95/p99، latency هر وابستگی، شمار تم
 - چه گلوگاه یا هزینهٔ عملیاتی تازه‌ای ایجاد می‌شود؟
 - چه نتیجه‌ای باعث رد کردن این طراحی می‌شود؟
 
-## رفرنس‌ها
+## منابع
+
+### مبنای کتاب
 
 - Ian Gorton، *Foundations of Scalable Systems*، فصل 09: “Microservices” — [صفحهٔ فصل در O’Reilly](https://www.oreilly.com/library/view/foundations-of-scalable/9781098106058/ch09.html).
+
+### مستندات فنی بیرونی
+
 - مستندات فنی اولیه: [مرجع رسمی](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/microservices).
+
+### پیوندهای این مخزن
+
 - نقشهٔ فصل‌ها و ترتیب پیاده‌سازی مخزن: [نقشهٔ راه فارسی](../../docs/SCALABILITY-ROADMAP-FA.md).
 
 ## نام‌گذاری و استقلال

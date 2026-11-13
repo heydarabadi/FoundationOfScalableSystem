@@ -83,6 +83,20 @@ ack/commit input message
 
 تمرین: یک پیام را در سه نقطهٔ قبل از اثر، پس از commit، و پیش از ack متوقف کن؛ ثابت کن هیچ سفارش دوباره رزرو نمی‌شود و هیچ پیام دائمی گم نشده است. سپس ورودی را بیشتر از مصرف‌کننده کن و backpressure را مشاهده کن.
 
+### primitiveهای پیام و مثال broker
+
+الگوهای پایه عبارت‌اند از point-to-point queue، publish/subscribe و routing بر اساس key/topic. RabbitMQ در مثال کتاب exchange را از queue جدا می‌کند: producer پیام را به exchange می‌دهد و bindingها تعیین می‌کنند کدام queue نسخهٔ پیام را بگیرد. competing consumers یک queue را برای موازی‌سازی مصرف می‌کنند؛ subscriberهای جدا هرکدام نسخهٔ رویداد را دریافت می‌کنند. این مدل را با Kafka log اشتباه نگیریم: در queue معمولی پیام معمولاً پس از ack از queue برداشته می‌شود، اما log Kafka تا پایان retention قابل replay می‌ماند.
+
+دوام پیام وابسته به durable queue، پیام persistent، تأیید publisher و سیاست replication/ack است؛ فقط نوشتن پیام در RAM اثبات durability نیست. تأیید قوی‌تر می‌تواند latency را بالا ببرد و replication نیز هزینهٔ شبکه و دیسک دارد. برای poison message retry نامحدود نکن؛ retry محدود، backoff و dead-letter مسیر عملیاتی لازم است. عبارت exactly-once را برای کل سامانه وعده نده: اثر تکرارناپذیر معمولاً با idempotency یا تراکنش مقصد ساخته می‌شود.
+
+### خودآزمایی همراه پاسخ
+
+1. **پرسش:** چرا ack پیش از اثر پایدار خطرناک است؟
+   **پاسخ کوتاه:** اگر پیام ack شود و برنامه پیش از commit اثر crash کند، broker ممکن است پیام را حذف‌شده بداند و کار از دست برود؛ ack پس از اثر معمولاً duplicate احتمالی می‌دهد.
+
+2. **پرسش:** با پیام poison چه می‌کنیم؟
+   **پاسخ کوتاه:** تعداد retry را محدود، خطا را ثبت، پیام را به DLQ/quarantine می‌بریم و ابزار بررسی/اصلاح/replay فراهم می‌کنیم تا یک پیام کل صف را متوقف نکند.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `ReliableAsyncMessagingLab`.
@@ -123,10 +137,18 @@ ack/commit input message
 - چه گلوگاه یا هزینهٔ عملیاتی تازه‌ای ایجاد می‌شود؟
 - چه نتیجه‌ای باعث رد کردن این طراحی می‌شود؟
 
-## رفرنس‌ها
+## منابع
+
+### مبنای کتاب
 
 - Ian Gorton، *Foundations of Scalable Systems*، فصل 07: “Asynchronous Messaging” — [صفحهٔ فصل در O’Reilly](https://www.oreilly.com/library/view/foundations-of-scalable/9781098106058/ch07.html).
+
+### مستندات فنی بیرونی
+
 - مستندات فنی اولیه: [مرجع رسمی](https://kafka.apache.org/documentation/).
+
+### پیوندهای این مخزن
+
 - نقشهٔ فصل‌ها و ترتیب پیاده‌سازی مخزن: [نقشهٔ راه فارسی](../../docs/SCALABILITY-ROADMAP-FA.md).
 
 ## نام‌گذاری و استقلال

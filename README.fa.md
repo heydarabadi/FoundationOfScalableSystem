@@ -2,6 +2,12 @@
 
 # راه‌حل‌های مقیاس‌پذیری و بار بالا
 
+<p align="center">
+  <a href="https://www.oreilly.com/library/view/foundations-of-scalable/9781098106058/">
+    <img src="https://www.oreilly.com/covers/urn%3Aorm%3Abook%3A9781098106058/296w/?format=webp" width="220" alt="جلد کتاب Foundations of Scalable Systems نوشتهٔ Ian Gorton">
+  </a>
+</p>
+
 این مخزن یک مسیر یادگیری و benchmark بر پایهٔ کتاب *Foundations of Scalable Systems* نوشتهٔ Ian Gorton برای مقیاس‌پذیری و برنامه‌نویسی پرفورمنس‌بالاست. هر solution مستقل، بخشی از مفاهیم را اجرا و اندازه‌گیری می‌کند و محدودیت‌های خودش را گزارش می‌دهد. کتاب مفاهیم را می‌دهد و این مخزن آزمایش‌های قابل‌اجرا را.
 
 ## مسیر یادگیری
@@ -23,7 +29,7 @@
 
 | رویکرد | English guide | راهنمای فارسی |
 |---|---|---|
-| پردازش رویدادمحور با Kafka و Kubernetes | [Event-driven Kafka](solutions/14-scalable-event-driven-processing/README.md) | [Kafka و Kubernetes](solutions/14-scalable-event-driven-processing/README.fa.md) |
+| پردازش رویدادمحور با Kafka و Kubernetes | [Event-driven Kafka](solutions/14-scalable-event-driven-processing/README.md) | [Kafka و Kubernetes](solutions/14-scalable-event-driven-processing/README.fa.md) · [درس کامل فصل ۱۴](solutions/14-scalable-event-driven-processing/CHAPTER-GUIDE-FA.md) |
 
 هر راه‌حل مستقل است. برای پیش‌نیازها، اجرای محلی، زیرساخت و پروفایل‌های پرفورمنس، README همان پوشه را شروع کنید. راه‌حل‌های بعدی پس از انتخاب و پیاده‌سازی، به‌صورت پوشه‌های هم‌سطح در `solutions/` اضافه می‌شوند.
 

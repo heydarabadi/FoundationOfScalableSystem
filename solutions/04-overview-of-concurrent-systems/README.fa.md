@@ -87,6 +87,20 @@ var workers = Enumerable.Range(0, workerCount).Select(_ => Task.Run(async () =>
 - cancellation را تا پایین‌ترین API قابل لغو منتقل کن.
 - تست کن دو worker برای یک key نتوانند state ناسازگار بسازند؛ هم‌زمان contention و tail latency را اندازه بگیر.
 
+### چرخهٔ عمر و هماهنگی threadها
+
+Thread معمولاً از حالت ایجادشده به runnable می‌رود؛ scheduler آن را اجرا می‌کند. هنگام انتظار برای lock یا منبع در حالت blocked است، برای رخداد/شرط منتظر می‌ماند، ممکن است timed-wait داشته باشد و پس از پایان terminated می‌شود. این وضعیت‌ها برای تشخیص threadی که CPU می‌گیرد با threadی که فقط منتظر است مهم‌اند؛ تعداد thread زیاد به معنی parallelism مفید نیست.
+
+Lock بخش بحرانی را از race محافظت می‌کند، اما ترتیب گرفتن چند lock باید ثابت باشد تا چرخهٔ deadlock ساخته نشود. Semaphore تعداد دسترسی هم‌زمان به منبع محدود را کنترل می‌کند؛ condition/barrier هماهنگی مرحله‌ای می‌سازد. Barrier همهٔ شرکت‌کنندگان را تا رسیدن آخرین عضو نگه می‌دارد، بنابراین یک عضو کند می‌تواند کل مرحله را معطل کند. Thread pool هزینهٔ ساخت thread را کم می‌کند ولی باید با ظرفیت I/O/CPU تنظیم شود. Concurrent collection عملیات مشخص را امن می‌کند، اما چند عملیات پیاپی را خودبه‌خود transaction نمی‌کند.
+
+### خودآزمایی همراه پاسخ
+
+1. **پرسش:** race condition و deadlock چه تفاوتی دارند؟
+   **پاسخ کوتاه:** Race یعنی نتیجه به interleaving وابسته است؛ deadlock یعنی کارها در انتظار قفل/منبع همدیگر چرخه می‌سازند و پیشروی نمی‌کنند.
+
+2. **پرسش:** چرا صف bounded برای workerها مهم است؟
+   **پاسخ کوتاه:** ظرفیت بافر را محدود می‌کند تا ورودی سریع‌تر از پردازش باعث رشد نامحدود حافظه نشود؛ پرشدن صف باید backpressure یا رد کنترل‌شده بسازد.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `ConcurrentExecutionLab`.
@@ -116,10 +130,18 @@ Throughput, queue wait, allocation, CPU, lock contention, and tail latency as co
 - چه گلوگاه یا هزینهٔ عملیاتی تازه‌ای ایجاد می‌شود؟
 - چه نتیجه‌ای باعث رد کردن این طراحی می‌شود؟
 
-## رفرنس‌ها
+## منابع
+
+### مبنای کتاب
 
 - Ian Gorton، *Foundations of Scalable Systems*، فصل 04: “An Overview of Concurrent Systems” — [صفحهٔ فصل در O’Reilly](https://www.oreilly.com/library/view/foundations-of-scalable/9781098106058/ch04.html).
+
+### مستندات فنی بیرونی
+
 - مستندات فنی اولیه: [مرجع رسمی](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/).
+
+### پیوندهای این مخزن
+
 - نقشهٔ فصل‌ها و ترتیب پیاده‌سازی مخزن: [نقشهٔ راه فارسی](../../docs/SCALABILITY-ROADMAP-FA.md).
 
 ## نام‌گذاری و استقلال

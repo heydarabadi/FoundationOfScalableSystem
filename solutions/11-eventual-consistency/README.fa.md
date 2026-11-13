@@ -76,6 +76,20 @@ Read repair هنگام مشاهدهٔ replicaهای متفاوت ممکن است
 
 تمرین: replica را با delay مصنوعی عقب بینداز، write انجام بده و read را از replica/leader مقایسه کن. رفتار UI را برای stale، unavailable و conflict تعریف و R/W/N را با شکست یک node بررسی کن.
 
+### Repair و حل تعارض replicaها
+
+در active repair، سامانه پس‌زمینه replicaها را با anti-entropy مقایسه می‌کند تا اختلافی که مدت‌ها خوانده نشده هم پیدا شود. در passive/read repair، اختلاف هنگام read کشف و همان موقع اصلاح می‌شود؛ این کار latency همان درخواست را بالا می‌برد و الزاماً کل dataset را بررسی نمی‌کند.
+
+اگر دو write هم‌زمان برسند، باید نتیجه را تعیین کنیم. Last-write-wins ساده است، اما به timestamp و tie-breaker وابسته است و ممکن است update معتبر را بی‌صدا حذف کند. Version vector یا metadata علّی می‌تواند concurrent update را آشکار کند تا merge یا تصمیم کسب‌وکار انجام شود. برای سبد خرید، افزودن دو قلم را می‌توان merge کرد؛ برای کسر موجودی، overwrite کردن مقادیر ممکن است invariant را بشکند. سیاست conflict باید بر اساس معنای داده باشد.
+
+### خودآزمایی همراه پاسخ
+
+1. **پرسش:** R=2 و W=2 در N=3 چه کمکی می‌کند؟
+   **پاسخ کوتاه:** در مدل ساده، مجموعهٔ replicaهای read/write دست‌کم اشتراک دارد؛ اما intersection به‌تنهایی ترتیب، version policy یا linearizability را تضمین نمی‌کند.
+
+2. **پرسش:** دو روش کلی repair چه هستند؟
+   **پاسخ کوتاه:** active repair اختلاف replicaها را با read/repair یا anti-entropy پیدا می‌کند؛ passive repair هنگام دسترسی به دادهٔ ناسازگار آن را اصلاح می‌کند. سیاست conflict همچنان لازم است.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `EventualConsistencyRecoveryLab`.
@@ -117,10 +131,18 @@ staleness مشاهده‌شده و زمان همگرایی، موفقیت RYOW،
 - چه گلوگاه یا هزینهٔ عملیاتی تازه‌ای ایجاد می‌شود؟
 - چه نتیجه‌ای باعث رد کردن این طراحی می‌شود؟
 
-## رفرنس‌ها
+## منابع
+
+### مبنای کتاب
 
 - Ian Gorton، *Foundations of Scalable Systems*، فصل 11: “Eventual Consistency” — [صفحهٔ فصل در O’Reilly](https://www.oreilly.com/library/view/foundations-of-scalable/9781098106058/ch11.html).
+
+### مستندات فنی بیرونی
+
 - مستندات فنی اولیه: [مرجع رسمی](https://cassandra.apache.org/doc/latest/cassandra/architecture/dynamo.html).
+
+### پیوندهای این مخزن
+
 - نقشهٔ فصل‌ها و ترتیب پیاده‌سازی مخزن: [نقشهٔ راه فارسی](../../docs/SCALABILITY-ROADMAP-FA.md).
 
 ## نام‌گذاری و استقلال

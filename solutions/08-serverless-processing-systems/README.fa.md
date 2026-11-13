@@ -71,6 +71,20 @@ Autoscaling پلتفرم را با نیاز پایین‌دست محدود کن.
 - صف و function می‌توانند flood به دیتابیس ایجاد کنند؛ concurrency سقف‌دار لازم است.
 - قیمت و سهمیهٔ provider دائماً عوض می‌شود؛ اعداد کتاب ۲۰۲۲ را امروز hard-code نکن.
 
+### دو مدل اجرای نمونهٔ کتاب
+
+Google App Engine در مدل PaaS بخش زیادی از مدیریت server و autoscaling را پنهان می‌کند؛ انتخاب محیط استاندارد/انعطاف‌پذیر و محدودیت‌های runtime بر وابستگی‌ها و زمان اجرا اثر دارد. AWS Lambda تابع را در runtime مدیریت‌شده اجرا می‌کند؛ invocation ممکن است محیط گرم را دوباره استفاده کند، ولی نباید به ماندگاری process محلی تکیه کرد. cold start، سقف مدت، concurrency و اتصال به دیتابیس باید در lifecycle لحاظ شود. این دو نمونه نمایندهٔ یک اصل‌اند، نه ادعای این‌که همهٔ serverlessها رفتار یکسان دارند.
+
+مطالعهٔ throughput/cost باید نرخ ورود، زمان اجرای تابع، اندازهٔ حافظه، concurrency و هزینهٔ سرویس‌های پایین‌دست را با هم تغییر دهد. یک workload ثابت را با چند مقدار concurrency و batch اجرا و latency دنباله‌ای، نرخ خطا، زمان scale-up و هزینه به ازای کار موفق ثبت کن؛ throughput بیشینه اگر از SLO یا بودجه بیرون باشد انتخاب مناسبی نیست.
+
+### خودآزمایی همراه پاسخ
+
+1. **پرسش:** چه workloadی برای serverless مناسب‌تر است؟
+   **پاسخ کوتاه:** کارهای کوتاه و bursty/نامنظم که مقیاس و هزینهٔ invocation سود دارد؛ باید cold start، محدودیت concurrency و وابستگی پایین‌دست سنجیده شود.
+
+2. **پرسش:** چرا concurrency بالا می‌تواند به دیتابیس آسیب بزند؟
+   **پاسخ کوتاه:** هر اجرای هم‌زمان می‌تواند connection و query باز کند؛ سقف اجرای تابع باید با pool و ظرفیت پایین‌دست هماهنگ باشد.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `ServerlessThroughputCostLab`.
@@ -112,10 +126,18 @@ latency سرد و گرم در p50/p95/p99، throughput، concurrency فعال، 
 - چه گلوگاه یا هزینهٔ عملیاتی تازه‌ای ایجاد می‌شود؟
 - چه نتیجه‌ای باعث رد کردن این طراحی می‌شود؟
 
-## رفرنس‌ها
+## منابع
+
+### مبنای کتاب
 
 - Ian Gorton، *Foundations of Scalable Systems*، فصل 08: “Serverless Processing Systems” — [صفحهٔ فصل در O’Reilly](https://www.oreilly.com/library/view/foundations-of-scalable/9781098106058/ch08.html).
+
+### مستندات فنی بیرونی
+
 - مستندات فنی اولیه: [مرجع رسمی](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html).
+
+### پیوندهای این مخزن
+
 - نقشهٔ فصل‌ها و ترتیب پیاده‌سازی مخزن: [نقشهٔ راه فارسی](../../docs/SCALABILITY-ROADMAP-FA.md).
 
 ## نام‌گذاری و استقلال

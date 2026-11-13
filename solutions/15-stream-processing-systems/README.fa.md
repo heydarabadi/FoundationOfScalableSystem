@@ -71,6 +71,20 @@ orders source → validate → keyBy(region)
 
 این analytics است، نه کنترل موجودی تراکنشی. late event و duplicate را در تعریف نتیجه لحاظ کن. parallelism را 1، 2 و 4 کن و یک worker را متوقف کن؛ throughput، freshness p99، checkpoint duration، recovery time و duplicate sink effect را مقایسه کن.
 
+### DataStream API و ایمنی state
+
+در Flink، DataStream API جریان را از source به transformationها و sink می‌برد؛ operatorهای keyed state و window می‌توانند با parallel subtaskها مقیاس بگیرند. key تعیین می‌کند state یک entity کجا مالکیت داشته باشد؛ key skew می‌تواند یک subtask را گلوگاه کند. تغییر parallelism یا topology باید با سازگاری state و savepoint/checkpoint plan هماهنگ باشد.
+
+Checkpoint یک snapshot هماهنگ از state و موقعیت source است تا job بعد از failure بازیابی شود. barrierها بین داده حرکت می‌کنند و alignment ممکن است با backpressure طول بکشد؛ فاصلهٔ checkpoint، state backend و storage بیرونی بر recovery و throughput اثر دارند. «داده امن» را با سناریوی crash مشخص کن: چه رکوردی پذیرفته شد، کدام state ذخیره شد، sink چه زمانی commit شد و replay چه اثری دارد؟ end-to-end exactly-once نیازمند sink هماهنگ یا write idempotent است.
+
+### خودآزمایی همراه پاسخ
+
+1. **پرسش:** Checkpoint به‌تنهایی exactly-once end-to-end می‌دهد؟
+   **پاسخ کوتاه:** نه؛ state و offset را برای recovery هماهنگ می‌کند، اما side effect در sink باید transaction یا idempotency داشته باشد.
+
+2. **پرسش:** چه چیزی watermark را تعیین می‌کند؟
+   **پاسخ کوتاه:** برآورد پیشرفت event-time و میزان دیررس قابل‌انتظار؛ policy آن تعیین می‌کند window کی بسته شود و با late event چه کنیم.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `StatefulStreamProcessingLab`.
@@ -112,10 +126,18 @@ lag سرتاسری، رویداد دیررس/خارج از ترتیب، throughp
 - چه گلوگاه یا هزینهٔ عملیاتی تازه‌ای ایجاد می‌شود؟
 - چه نتیجه‌ای باعث رد کردن این طراحی می‌شود؟
 
-## رفرنس‌ها
+## منابع
+
+### مبنای کتاب
 
 - Ian Gorton، *Foundations of Scalable Systems*، فصل 15: “Stream Processing Systems” — [صفحهٔ فصل در O’Reilly](https://www.oreilly.com/library/view/foundations-of-scalable/9781098106058/ch15.html).
+
+### مستندات فنی بیرونی
+
 - مستندات فنی اولیه: [مرجع رسمی](https://nightlies.apache.org/flink/flink-docs-stable/docs/).
+
+### پیوندهای این مخزن
+
 - نقشهٔ فصل‌ها و ترتیب پیاده‌سازی مخزن: [نقشهٔ راه فارسی](../../docs/SCALABILITY-ROADMAP-FA.md).
 
 ## نام‌گذاری و استقلال

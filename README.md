@@ -1,5 +1,11 @@
 # Scalability and High-Load Solutions
 
+<p align="center">
+  <a href="https://www.oreilly.com/library/view/foundations-of-scalable/9781098106058/">
+    <img src="https://www.oreilly.com/covers/urn%3Aorm%3Abook%3A9781098106058/296w/?format=webp" width="220" alt="Cover of Foundations of Scalable Systems by Ian Gorton">
+  </a>
+</p>
+
 This repository is a book-led learning and benchmarking catalog for scalability and high-performance programming. Its learning sequence follows Ian Gorton’s *Foundations of Scalable Systems*; each independent solution applies selected ideas and reports its own measurements and limits. The book provides the concepts, while this repository provides runnable experiments.
 
 ## Learning path

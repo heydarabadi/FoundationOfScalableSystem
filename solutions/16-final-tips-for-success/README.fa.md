@@ -105,6 +105,20 @@ Data lake تاریخچهٔ چندقالبی و کم‌مصرف را روی objec
 
 یک سرویس آزمایشی را از commit تا deploy/rollback خودکار کن؛ synthetic traffic ثابت بساز؛ metrics/log/trace و alert روی SLO اضافه کن؛ failure و restore drill اجرا کن. دادهٔ قدیمی مصنوعی را به object storage export و از catalog query کن. محیط، نسخه، workload و نتیجهٔ خام را برای هر اجرا ذخیره کن.
 
+### انتخاب پلتفرم استقرار و دادهٔ تاریخی
+
+VM محیط سیستم‌عامل جدا و کنترل بیشتری می‌دهد، اما provisioning و patch با تیم است. Container image را قابل‌انتقال می‌کند ولی kernel و ظرفیت node مشترک‌اند. PaaS/serverless عملیات پایه را از تیم می‌گیرد، در برابر محدودیت runtime، quota و وابستگی provider. Kubernetes برای چند workload و نیازهای scheduling/rollout انعطاف می‌دهد، اما control plane، network، storage و upgrade را به مسئلهٔ عملیاتی تبدیل می‌کند؛ انتخاب باید با نیاز تیم و هزینهٔ اداره متناسب باشد.
+
+Data lake معمولاً object storage برای دادهٔ تاریخی کم‌هزینه و قالب‌های متنوع است. Catalog، partitioning، schema/lineage، کنترل دسترسی، lifecycle و حذف داده تعیین می‌کنند آن را بعداً بتوان پیدا کرد و امن مصرف کرد. این بستر analytics است، نه جایگزین تراکنش‌های کم‌تأخیر OLTP؛ freshness و فرایند ingestion را به مصرف‌کننده اعلام کن.
+
+### خودآزمایی همراه پاسخ
+
+1. **پرسش:** چه تفاوتی میان metrics، logs و traces هست؟
+   **پاسخ کوتاه:** Metrics روند و saturation را نشان می‌دهد، logs جزئیات رخداد و traces مسیر یک درخواست میان اجزا را؛ باید با SLO و تشخیص مسئله پیوند بخورند.
+
+2. **پرسش:** چرا data lake را جایگزین OLTP نمی‌کنیم؟
+   **پاسخ کوتاه:** برای تاریخچه و تحلیل چندقالبی مناسب است، اما معمولاً قرارداد latency و تراکنش مسیر عملیاتی را ندارد؛ تازگی و catalog/access control باید روشن باشد.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `ScalabilityEvidenceKit`.
@@ -129,10 +143,18 @@ Reproducibility, telemetry coverage, time to detect/recover, cleanup completenes
 - چه گلوگاه یا هزینهٔ عملیاتی تازه‌ای ایجاد می‌شود؟
 - چه نتیجه‌ای باعث رد کردن این طراحی می‌شود؟
 
-## رفرنس‌ها
+## منابع
+
+### مبنای کتاب
 
 - Ian Gorton، *Foundations of Scalable Systems*، فصل 16: “Final Tips for Success” — [صفحهٔ فصل در O’Reilly](https://www.oreilly.com/library/view/foundations-of-scalable/9781098106058/ch16.html).
+
+### مستندات فنی بیرونی
+
 - مستندات فنی اولیه: [مرجع رسمی](https://prometheus.io/docs/introduction/overview/).
+
+### پیوندهای این مخزن
+
 - نقشهٔ فصل‌ها و ترتیب پیاده‌سازی مخزن: [نقشهٔ راه فارسی](../../docs/SCALABILITY-ROADMAP-FA.md).
 
 ## نام‌گذاری و استقلال

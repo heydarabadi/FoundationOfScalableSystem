@@ -83,6 +83,14 @@ report: throughput, p50/p95/p99, errors, CPU, memory, DB pool, cost/run
 - اگر بار دو برابر شود کدام منبع اول اشباع می‌شود؟ چه داده‌ای این فرض را تأیید می‌کند؟
 - چه SLOای را حاضر هستیم برای هزینه یا دوام بیشتر مبادله کنیم؟
 
+### خودآزمایی همراه پاسخ
+
+1. **پرسش:** چرا افزایش throughput به‌تنهایی ثابت نمی‌کند سامانه مقیاس‌پذیر شده؟
+   **پاسخ کوتاه:** چون ممکن است p99، نرخ خطا، هزینه یا صحت بدتر شده باشد؛ باید بار، SLO، هزینه و صحت را با هم سنجید.
+
+2. **پرسش:** اگر با اضافه‌کردن replica ظرفیت بالا نرفت، گام بعد چیست؟
+   **پاسخ کوتاه:** اشباع و صف هر وابستگی را اندازه می‌گیریم؛ replica بیشتر ممکن است فقط فشار دیتابیس یا قفل داغ را زیاد کند.
+
 ## برنامهٔ application پیشنهادی
 
 - **نام application / راه‌حل:** `ScalabilityWorkloadLab`.
@@ -112,10 +120,18 @@ Throughput, p50/p95/p99 latency, error rate, CPU, memory, and cost per successfu
 - چه گلوگاه یا هزینهٔ عملیاتی تازه‌ای ایجاد می‌شود؟
 - چه نتیجه‌ای باعث رد کردن این طراحی می‌شود؟
 
-## رفرنس‌ها
+## منابع
+
+### مبنای کتاب
 
 - Ian Gorton، *Foundations of Scalable Systems*، فصل 01: “Introduction to Scalable Systems” — [صفحهٔ فصل در O’Reilly](https://www.oreilly.com/library/view/foundations-of-scalable/9781098106058/ch01.html).
+
+### مستندات فنی بیرونی
+
 - مستندات فنی اولیه: [مرجع رسمی](https://sre.google/sre-book/monitoring-distributed-systems/).
+
+### پیوندهای این مخزن
+
 - نقشهٔ فصل‌ها و ترتیب پیاده‌سازی مخزن: [نقشهٔ راه فارسی](../../docs/SCALABILITY-ROADMAP-FA.md).
 
 ## نام‌گذاری و استقلال
