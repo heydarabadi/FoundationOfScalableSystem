@@ -37,6 +37,7 @@ Each chapter has a bilingual README and its own original SVG concept diagram. Ch
 | 14. Scalable Event-Driven Processing | [README](../solutions/14-scalable-event-driven-processing/README.md) · [فارسی](../solutions/14-scalable-event-driven-processing/README.fa.md) |
 | 15. Stream Processing Systems | [README](../solutions/15-stream-processing-systems/README.md) · [فارسی](../solutions/15-stream-processing-systems/README.fa.md) |
 | 16. Final Tips for Success | [README](../solutions/16-final-tips-for-success/README.md) · [فارسی](../solutions/16-final-tips-for-success/README.fa.md) |
+
 | Book chapter | Paraphrased subject | Repository application |
 |---|---|---|
 | 1. Introduction to Scalable Systems | Scalability, cost, and architecture trade-offs | Define workload and SLO before choosing a design; compare capacity with cost and operability. |

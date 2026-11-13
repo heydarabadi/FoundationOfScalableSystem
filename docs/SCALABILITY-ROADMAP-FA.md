@@ -41,6 +41,7 @@
 | 14. Scalable Event-Driven Processing — پردازش رویدادمحور مقیاس‌پذیر | [درس کامل فارسی](../solutions/14-scalable-event-driven-processing/CHAPTER-GUIDE-FA.md) · [راهنمای اجرای فارسی](../solutions/14-scalable-event-driven-processing/README.fa.md) · [English](../solutions/14-scalable-event-driven-processing/README.md) |
 | 15. سامانه‌های پردازش Stream | [فارسی](../solutions/15-stream-processing-systems/README.fa.md) · [English](../solutions/15-stream-processing-systems/README.md) |
 | 16. توصیه‌های پایانی برای موفقیت | [فارسی](../solutions/16-final-tips-for-success/README.fa.md) · [English](../solutions/16-final-tips-for-success/README.md) |
+
 | فصل کتاب | موضوع به‌اختصار | کاربرد در مخزن |
 |---|---|---|
 | ۱. مقدمهٔ سیستم‌های مقیاس‌پذیر | مقیاس‌پذیری، هزینه و مصالحه‌های معماری | پیش از انتخاب طراحی، workload و SLO را تعریف کنیم و ظرفیت را کنار هزینه و بهره‌برداری بسنجیم. |
