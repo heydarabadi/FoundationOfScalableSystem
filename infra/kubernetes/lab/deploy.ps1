@@ -143,6 +143,8 @@ Invoke-Kubectl @("wait", "gateway/hpt-gateway", "-n", "hpt", "--for=condition=Pr
 Invoke-Kubectl @("wait", "httproute/hpt-api-route", "-n", "hpt", "--for=condition=Accepted", "--timeout=5m")
 
 Invoke-Kubectl @("apply", "-f", (Join-Path $labRoot "observability-exporters.yaml"))
+Invoke-Kubectl @("apply", "-f", (Join-Path $labRoot "prometheus-rbac.yaml"))
+Invoke-Kubectl @("apply", "-f", (Join-Path $labRoot "prometheus-config.yaml"))
 Invoke-Kubectl @("apply", "-f", (Join-Path $labRoot "prometheus.yaml"))
 Invoke-Kubectl @("rollout", "status", "deployment/hpt-prometheus", "-n", "hpt", "--timeout=10m")
 Invoke-Kubectl @("rollout", "status", "deployment/hpt-kafka-kafka-exporter", "-n", "hpt", "--timeout=10m")
